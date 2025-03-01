@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Share2, Image, Video, Smile, Send, MoreHorizontal, Flag, MessageCircle, Heart, Repeat } from 'lucide-react';
+import { Share2, Image, Video, Smile, Send, MoreHorizontal, Flag, MessageCircle, Heart, Repeat, Copy, Check } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 // First, add these interfaces at the top of your file
 interface Comment {
@@ -216,6 +217,46 @@ export default function HomePage() {
     });
   }, []);
 
+  const handleShare = async (postId: number) => {
+    const shareUrl = `${window.location.origin}/post/${postId}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Check out this post on FILxCONNECT',
+          text: 'I found this interesting post on FILxCONNECT',
+          url: shareUrl
+        });
+        
+        // Update share count
+        setPosts(prevPosts => prevPosts.map(post => 
+          post.id === postId 
+            ? { ...post, shares: post.shares + 1 }
+            : post
+        ));
+        
+        toast.success('Post shared successfully!');
+      } else {
+        throw new Error('Web Share API not supported');
+      }
+    } catch (error) {
+      // Fallback to copy link
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copied to clipboard!');
+        
+        // Update share count
+        setPosts(prevPosts => prevPosts.map(post => 
+          post.id === postId 
+            ? { ...post, shares: post.shares + 1 }
+            : post
+        ));
+      } catch (err) {
+        toast.error('Failed to share post');
+      }
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 animate-fade-in">
       <Card className="p-4 mb-6 shadow-md hover-scale transition-all">
@@ -412,10 +453,36 @@ export default function HomePage() {
                   <DialogTitle>Share this post</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                  <p>Share this post with your followers or on other platforms.</p>
+                  <p className="text-sm text-muted-foreground">
+                    Share this post with your followers or on other platforms
+                  </p>
                   <div className="flex gap-2">
-                    <Button className="flex-1">Share now</Button>
-                    <Button variant="outline" className="flex-1">Copy link</Button>
+                    <Button 
+                      className="flex-1 hover-scale"
+                      onClick={() => {
+                        handleShare(post.id);
+                        // Close the dialog after sharing
+                        const closeButton = document.querySelector('[data-dialog-close]');
+                        if (closeButton instanceof HTMLElement) {
+                          closeButton.click();
+                        }
+                      }}
+                    >
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share now
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1 hover-scale"
+                      onClick={async () => {
+                        const url = `${window.location.origin}/post/${post.id}`;
+                        await navigator.clipboard.writeText(url);
+                        toast.success('Link copied to clipboard!');
+                      }}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy link
+                    </Button>
                   </div>
                 </div>
               </DialogContent>
