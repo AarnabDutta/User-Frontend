@@ -147,3 +147,21 @@
 .hover-scale:hover {
   transform: scale(1.02);
 }
+
+.dialog-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dialog-scroll::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+.dialog-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 3px;
+}
+
+.dialog-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
+}

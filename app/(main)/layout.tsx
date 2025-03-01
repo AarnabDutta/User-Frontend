@@ -93,12 +93,46 @@ export default function MainLayout({
   const [sentRequests, setSentRequests] = useState<number[]>([]);
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSuggestionsModalOpen, setIsSuggestionsModalOpen] = useState(false);
+  const [suggestionsSearchQuery, setSuggestionsSearchQuery] = useState("");
 
   const navigation = [
     { name: 'Home', href: '/home', icon: Home, notifications: 0 },
     { name: 'Notifications', href: '/notifications', icon: Bell, notifications: 3 },
     { name: 'Messages', href: '/messages', icon: MessageCircle, notifications: 2 },
     { name: 'Profile', href: '/profile', icon: User, notifications: 0 },
+  ];
+
+  const allSuggestedUsers: SuggestedUser[] = [
+    ...suggestedUsers,
+    {
+      id: 4,
+      name: "Michael Chang",
+      username: "@mchang",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop",
+      title: "Filecoin Developer"
+    },
+    {
+      id: 5,
+      name: "Lisa Wang",
+      username: "@lwang",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop",
+      title: "IPFS Specialist"
+    },
+    {
+      id: 6,
+      name: "James Wilson",
+      username: "@jwilson",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop",
+      title: "Web3 Engineer"
+    },
+    {
+      id: 7,
+      name: "Elena Rodriguez",
+      username: "@erodriguez",
+      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=100&auto=format&fit=crop",
+      title: "Blockchain Architect"
+    }
   ];
 
   useEffect(() => {
@@ -367,9 +401,13 @@ export default function MainLayout({
           })}
         </div>
         <p className="text-sm text-muted-foreground text-center mt-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
-          <Link href="/discover" className="hover:text-primary transition-colors">
+          <Button
+            variant="link"
+            className="text-muted-foreground hover:text-primary"
+            onClick={() => setIsSuggestionsModalOpen(true)}
+          >
             View more suggestions →
-          </Link>
+          </Button>
         </p>
       </div>
 
@@ -430,6 +468,78 @@ export default function MainLayout({
                     </Button>
                   </div>
                 ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSuggestionsModalOpen} onOpenChange={setIsSuggestionsModalOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader className="sticky top-0 bg-background z-10 pb-4">
+            <DialogTitle className="text-2xl font-bold">
+              Suggested Connections
+            </DialogTitle>
+            <div className="relative mt-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search people..."
+                className="w-full pl-10 bg-muted/50"
+                value={suggestionsSearchQuery}
+                onChange={(e) => setSuggestionsSearchQuery(e.target.value)}
+              />
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto dialog-scroll pr-4 -mr-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {allSuggestedUsers
+                .filter(user => 
+                  user.name.toLowerCase().includes(suggestionsSearchQuery.toLowerCase()) ||
+                  user.username.toLowerCase().includes(suggestionsSearchQuery.toLowerCase()) ||
+                  user.title.toLowerCase().includes(suggestionsSearchQuery.toLowerCase())
+                )
+                .map((user) => {
+                  const isRequestSent = sentRequests.includes(user.id);
+                  
+                  return (
+                    <Card 
+                      key={user.id} 
+                      className="p-4 hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-12 w-12">
+                          <img src={user.avatar} alt={user.name} className="object-cover" />
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{user.name}</p>
+                          <p className="text-sm text-muted-foreground truncate">{user.title}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.username}</p>
+                        </div>
+                        <Button 
+                          size="sm"
+                          variant={isRequestSent ? "ghost" : "default"}
+                          className={`transition-all duration-300 ${
+                            isRequestSent ? "text-green-500" : ""
+                          }`}
+                          onClick={() => {
+                            if (!isRequestSent) {
+                              setSentRequests(prev => [...prev, user.id]);
+                            }
+                          }}
+                          disabled={isRequestSent}
+                        >
+                          {isRequestSent ? (
+                            <Check className="h-4 w-4" />
+                          ) : (
+                            <UserPlus className="h-4 w-4" />
+                          )}
+                          <span className="ml-2">{isRequestSent ? 'Connected' : 'Connect'}</span>
+                        </Button>
+                      </div>
+                    </Card>
+                  );
+                })}
             </div>
           </div>
         </DialogContent>
