@@ -183,68 +183,68 @@ export default function MessagesPage() {
   }, [searchQuery]);
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex animate-fade-in">
-      {/* Contacts sidebar */}
-      <div className="w-full md:w-80 border-r flex flex-col">
-        <div className="p-4 border-b">
+    <div className="h-[calc(100vh-4rem)] flex gap-4 p-4 animate-fade-in bg-slate-50/30 dark:bg-slate-950/30">
+      {/* Contacts sidebar - enhanced shadow and border */}
+      <div className="w-full md:w-80 flex flex-col bg-background/95 shadow-xl rounded-2xl border border-blue-100/20 dark:border-blue-900/20 backdrop-blur-sm overflow-hidden">
+        {/* Search section */}
+        <div className="p-4 bg-blue-50/80 dark:bg-blue-950/50">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Search messages" 
-              className="pl-10 hover-scale"
+              className="pl-10 hover-scale bg-background/90 border-blue-100 dark:border-blue-900/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
         
-        <ScrollArea className="flex-1">
-          <div className="p-2">
-            {filteredContacts.map((contact) => (
-              <div 
-                key={contact.id}
-                className={`p-2 rounded-lg mb-2 cursor-pointer transition-all contact-item hover-scale ${
-                  activeContact?.id === contact.id 
-                    ? 'bg-primary/10' 
-                    : 'hover:bg-muted'
-                }`}
-                onClick={() => selectContact(contact)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <Avatar className="h-12 w-12">
-                      <img src={contact.avatar} alt={contact.name} />
-                    </Avatar>
-                    {contact.online && (
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></span>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium truncate">{contact.name}</h3>
-                      <span className="text-xs text-muted-foreground">{contact.time}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground truncate">{contact.lastMessage}</p>
-                  </div>
-                  
-                  {contact.unread > 0 && (
-                    <Badge variant="destructive" className="rounded-full h-5 min-w-5 flex items-center justify-center">
-                      {contact.unread}
-                    </Badge>
+        <ScrollArea className="flex-1 px-2">
+          {/* Updated contact items styling */}
+          {filteredContacts.map((contact) => (
+            <div 
+              key={contact.id}
+              className={`p-3 rounded-xl mb-2 cursor-pointer transition-all contact-item hover-scale border ${
+                activeContact?.id === contact.id 
+                  ? 'bg-blue-100/80 dark:bg-blue-900/60 border-blue-200 dark:border-blue-800' 
+                  : 'hover:bg-blue-50/80 dark:hover:bg-blue-950/60 border-transparent'
+              }`}
+              onClick={() => selectContact(contact)}
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Avatar className="h-12 w-12">
+                    <img src={contact.avatar} alt={contact.name} />
+                  </Avatar>
+                  {contact.online && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full"></span>
                   )}
                 </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-medium truncate">{contact.name}</h3>
+                    <span className="text-xs text-muted-foreground">{contact.time}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground truncate">{contact.lastMessage}</p>
+                </div>
+                
+                {contact.unread > 0 && (
+                  <Badge variant="destructive" className="rounded-full h-5 min-w-5 flex items-center justify-center">
+                    {contact.unread}
+                  </Badge>
+                )}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </ScrollArea>
       </div>
       
-      {/* Chat area */}
+      {/* Chat area - enhanced shadow and border */}
       {activeContact ? (
-        <div className="hidden md:flex flex-col flex-1">
+        <div className="hidden md:flex flex-col flex-1 bg-background/95 rounded-2xl shadow-xl border border-blue-100/20 dark:border-blue-900/20 backdrop-blur-sm overflow-hidden">
           {/* Chat header */}
-          <div className="p-4 border-b flex justify-between items-center">
+          <div className="p-4 bg-blue-50/80 dark:bg-blue-950/50 shadow-sm">
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
                 <img src={activeContact.avatar} alt={activeContact.name} />
@@ -258,7 +258,7 @@ export default function MessagesPage() {
             </div>
             
             <div className="flex gap-2">
-              <Button variant="ghost" size="icon" className="hover-scale">
+              {/* <Button variant="ghost" size="icon" className="hover-scale">
                 <Phone className="h-5 w-5" />
               </Button>
               <Button variant="ghost" size="icon" className="hover-scale">
@@ -266,12 +266,12 @@ export default function MessagesPage() {
               </Button>
               <Button variant="ghost" size="icon" className="hover-scale">
                 <MoreVertical className="h-5 w-5" />
-              </Button>
+              </Button> */}
             </div>
           </div>
           
-          {/* Messages */}
-          <ScrollArea className="flex-1 p-4">
+          {/* Messages area - add subtle gradient background */}
+          <ScrollArea className="flex-1 p-4 bg-gradient-to-b from-transparent to-blue-50/20 dark:to-blue-950/20">
             <div className="space-y-4">
               {messages.map((message) => {
                 const isCurrentUser = message.senderId === 0;
@@ -289,10 +289,10 @@ export default function MessagesPage() {
                       )}
                       
                       <div 
-                        className={`p-3 rounded-lg ${
+                        className={`p-3 rounded-xl shadow-sm ${
                           isCurrentUser 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-muted'
+                            ? 'bg-blue-500 text-white' 
+                            : 'bg-blue-50 dark:bg-blue-900/40'
                         }`}
                       >
                         <p className="text-sm">{message.text}</p>
@@ -308,15 +308,15 @@ export default function MessagesPage() {
             </div>
           </ScrollArea>
           
-          {/* Message input */}
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Button variant="ghost" size="icon" className="hover-scale">
+          {/* Message input area */}
+          <div className="p-4 bg-blue-50/80 dark:bg-blue-950/50 shadow-sm">
+            <div className="flex gap-2 bg-background/90 p-2 rounded-xl border border-blue-100/30 dark:border-blue-900/30">
+              {/* <Button variant="ghost" size="icon" className="hover-scale">
                 <Paperclip className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="hover-scale">
+              </Button> */}
+              {/* <Button variant="ghost" size="icon" className="hover-scale">
                 <Image className="h-5 w-5" />
-              </Button>
+              </Button> */}
               <Button variant="ghost" size="icon" className="hover-scale">
                 <Smile className="h-5 w-5" />
               </Button>
@@ -344,7 +344,7 @@ export default function MessagesPage() {
           </div>
         </div>
       ) : (
-        <div className="hidden md:flex flex-col flex-1 items-center justify-center text-center p-8">
+        <div className="hidden md:flex flex-col flex-1 items-center justify-center text-center p-8 bg-background/95 rounded-2xl shadow-xl border border-blue-100/20 dark:border-blue-900/20 backdrop-blur-sm">
           <div className="bg-primary/10 p-4 rounded-full mb-4 animate-pulse-slow">
             <MessageCircle className="h-12 w-12 text-primary" />
           </div>
@@ -356,8 +356,8 @@ export default function MessagesPage() {
         </div>
       )}
       
-      {/* Mobile view - show only contacts list or chat */}
-      <div className="md:hidden flex-1">
+      {/* Mobile view updates */}
+      <div className="md:hidden flex-1 bg-background/95">
         {activeContact ? (
           <div className="flex flex-col h-full">
             {/* Chat header */}

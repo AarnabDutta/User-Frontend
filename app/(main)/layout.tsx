@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth'; // Make sure you have this hook
+import Image from 'next/image';
 
 interface SuggestedUser {
   id: number;
@@ -157,12 +158,18 @@ export default function MainLayout({
           ? "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm" 
           : "bg-background"
       }`}>
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2 animate-fade-in">
-            <div className="bg-primary/10 p-1.5 rounded-full">
-              <Share2 className="h-6 w-6 text-primary" />
+        <div className="container flex h-16 items-center justify-between px-6">
+          <div className="flex items-center gap-3 animate-fade-in pl-2">
+            <div className="flex items-center">
+              <Image 
+                src="/new logo.png"
+                alt="FILxCONNECT Logo"
+                width={45}
+                height={45}
+                className="object-contain"
+              />
             </div>
-            <span className="text-xl font-bold">FILxCONNECT</span>
+            <span className="text-xl font-bold text-primary">FILxCONNECT</span>
           </div>
           
           {/* Add the search bar */}

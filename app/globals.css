@@ -165,3 +165,30 @@
 .dialog-scroll::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--accent));
 }
+
+/* Add these custom utility classes */
+@layer utilities {
+  .glass-effect {
+    @apply bg-background/95 backdrop-blur-sm border border-blue-100/20 dark:border-blue-900/20;
+  }
+  
+  .message-bubble {
+    @apply shadow-md hover:shadow-lg transition-shadow duration-200;
+  }
+  
+  .hover-scale {
+    @apply transition-all duration-200 hover:scale-[1.02] active:scale-[0.98];
+  }
+}
+
+/* Add custom shadows */
+.shadow-xl {
+  box-shadow: 0 0 40px -12px rgba(0, 0, 0, 0.15),
+              0 0 20px -5px rgba(59, 130, 246, 0.1);
+}
+
+/* Dark mode shadow */
+.dark .shadow-xl {
+  box-shadow: 0 0 40px -12px rgba(0, 0, 0, 0.3),
+              0 0 20px -5px rgba(59, 130, 246, 0.05);
+}
