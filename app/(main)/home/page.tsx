@@ -17,11 +17,34 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
+// First, add these interfaces at the top of your file
+interface Comment {
+  id: number;
+  author: string;
+  avatar: string;
+  content: string;
+  time: string;
+}
+
+interface Post {
+  id: number;
+  author: string;
+  avatar: string;
+  content: string;
+  image: string | null;
+  time: string;
+  likes: number;
+  liked: boolean;
+  comments: number;
+  commentsList: Comment[];
+  shares: number;
+}
+
 export default function HomePage() {
   const [newPost, setNewPost] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [posts, setPosts] = useState([
+  const [posts, setPosts] = useState<Post[]>([
     {
       id: 1,
       author: 'John Doe',
@@ -32,6 +55,22 @@ export default function HomePage() {
       likes: 24,
       liked: false,
       comments: 5,
+      commentsList: [
+        {
+          id: 1,
+          author: 'Alice Johnson',
+          avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop',
+          content: 'This is amazing! Keep up the great work! 🎉',
+          time: '1h ago'
+        },
+        {
+          id: 2,
+          author: 'Bob Wilson',
+          avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop',
+          content: 'Interesting perspective on blockchain technology',
+          time: '30m ago'
+        }
+      ],
       shares: 2
     },
     {
@@ -44,6 +83,7 @@ export default function HomePage() {
       likes: 42,
       liked: false,
       comments: 8,
+      commentsList: [],
       shares: 6
     },
     {
@@ -56,6 +96,7 @@ export default function HomePage() {
       likes: 67,
       liked: true,
       comments: 12,
+      commentsList: [],
       shares: 9
     }
   ]);
@@ -84,6 +125,7 @@ export default function HomePage() {
         likes: 0,
         liked: false,
         comments: 0,
+        commentsList: [],
         shares: 0
       };
       
@@ -127,21 +169,36 @@ export default function HomePage() {
     setCommentText('');
   };
 
+  // Then update the submitComment function
   const submitComment = (postId: number) => {
     if (!commentText.trim()) return;
-    
-    setPosts(posts.map(post => {
-      if (post.id === postId) {
-        return {
-          ...post,
-          comments: post.comments + 1
-        };
-      }
-      return post;
-    }));
-    
-    setCommentText('');
-    setActiveCommentId(null);
+
+    try {
+      setPosts(prevPosts => prevPosts.map(post => {
+        if (post.id === postId) {
+          const newComment: Comment = {
+            id: Date.now(),
+            author: 'You',
+            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop',
+            content: commentText.trim(),
+            time: 'Just now'
+          };
+
+          return {
+            ...post,
+            comments: post.comments + 1,
+            commentsList: [newComment, ...post.commentsList]
+          };
+        }
+        return post;
+      }));
+
+      setCommentText('');
+      // Optionally, you can add a success toast/notification here
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+      // Optionally, you can add an error toast/notification here
+    }
   };
 
   const addEmoji = (emoji: string) => {
@@ -366,32 +423,63 @@ export default function HomePage() {
           </div>
           
           {activeCommentId === post.id && (
-            <div className="mt-4 flex gap-2">
-              <Avatar className="w-8 h-8">
-                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
-              </Avatar>
-              <div className="flex-1">
-                <Input 
-                  placeholder="Write a comment..." 
-                  value={commentText}
-                  onChange={(e) => setCommentText(e.target.value)}
-                  className="mb-2"
-                />
-                <div className="flex justify-end gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setActiveCommentId(null)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    size="sm"
-                    onClick={() => submitComment(post.id)}
-                    disabled={!commentText.trim()}
-                  >
-                    Comment
-                  </Button>
+            <div className="mt-4 space-y-4">
+              {/* Existing Comments */}
+              <div className="space-y-4">
+                {post.commentsList.map((comment) => (
+                  <div key={comment.id} className="flex gap-3 animate-fade-in">
+                    <Avatar className="w-8 h-8">
+                      <img src={comment.avatar} alt={comment.author} />
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="bg-muted p-3 rounded-lg">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-medium text-sm">{comment.author}</h4>
+                          <span className="text-xs text-muted-foreground">{comment.time}</span>
+                        </div>
+                        <p className="text-sm">{comment.content}</p>
+                      </div>
+                      <div className="flex gap-4 mt-1">
+                        <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                          Like
+                        </button>
+                        <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                          Reply
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* New Comment Input */}
+              <div className="flex gap-3">
+                <Avatar className="w-8 h-8">
+                  <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
+                </Avatar>
+                <div className="flex-1 space-y-2">
+                  <Input 
+                    placeholder="Write a comment..." 
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
+                    className="bg-muted/50"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setActiveCommentId(null)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={() => submitComment(post.id)}
+                      disabled={!commentText.trim()}
+                    >
+                      Comment
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
