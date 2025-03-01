@@ -152,7 +152,7 @@ export default function MainLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className={`fixed top-0 w-full border-b z-50 transition-all duration-200 ${
+      <header className={`fixed top-0 w-full z-50 transition-all duration-200 ${
         scrolled 
           ? "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm" 
           : "bg-background"
@@ -263,7 +263,7 @@ export default function MainLayout({
       </header>
 
       {/* Sidebar Navigation */}
-      <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r p-4 hidden md:block animate-fade-in">
+      <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 p-4 hidden md:block animate-fade-in">
         <div className="flex items-center gap-3 mb-6 p-2">
           <Avatar className="h-10 w-10">
             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
@@ -299,7 +299,7 @@ export default function MainLayout({
           })}
         </nav>
         
-        <div className="mt-8 border-t pt-6">
+        <div className="mt-8 pt-6">
           <h3 className="font-semibold mb-4 px-2">My Connections</h3>
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
             {myConnections.map((connection) => (
@@ -336,7 +336,7 @@ export default function MainLayout({
       </div>
 
       {/* Mobile Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 border-t bg-background md:hidden z-10">
+      <div className="fixed bottom-0 left-0 right-0 bg-background md:hidden z-10">
         <nav className="flex justify-around p-2">
           {navigation.map((item) => {
             const Icon = item.icon;
@@ -368,7 +368,7 @@ export default function MainLayout({
       </main>
 
       {/* Add the People You May Know section */}
-      <div className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 border-l p-4 hidden md:block animate-fade-in">
+      <div className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 p-4 hidden md:block animate-fade-in">
         <h3 className="font-semibold mb-4 animate-slide-up">People you may know</h3>
         <div className="space-y-3">
           {suggestedUsers.map((user, index) => {
