@@ -21,6 +21,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth'; // Make sure you have this hook
 
 interface SuggestedUser {
   id: number;
@@ -135,6 +137,9 @@ export default function MainLayout({
     }
   ];
 
+  const router = useRouter();
+  const { signOut } = useAuth();
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -223,7 +228,14 @@ export default function MainLayout({
                     </nav>
                     
                     <div className="p-4 border-t">
-                      <Button variant="outline" className="w-full justify-start hover-scale">
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start hover-scale"
+                        onClick={async () => {
+                          await signOut();
+                          router.push('/login');
+                        }}
+                      >
                         <LogOut className="mr-2 h-5 w-5" />
                         Logout
                       </Button>
@@ -234,7 +246,15 @@ export default function MainLayout({
             </div>
             
             <div className="hidden md:block">
-              <Button variant="ghost" size="icon" className="hover-scale">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover-scale"
+                onClick={async () => {
+                  await signOut();
+                  router.push('/login');
+                }}
+              >
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
