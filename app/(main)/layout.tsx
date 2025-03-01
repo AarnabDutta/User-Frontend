@@ -1,0 +1,439 @@
+'use client';
+
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Button } from '@/components/ui/button';
+import { Share2, Home, Bell, MessageCircle, User, LogOut, Menu, Search, Check, UserPlus } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetTrigger 
+} from '@/components/ui/sheet';
+import { Avatar } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+interface SuggestedUser {
+  id: number;
+  name: string;
+  username: string;
+  avatar: string;
+  title: string;
+}
+
+interface Connection {
+  id: number;
+  name: string;
+  avatar: string;
+  status: 'online' | 'offline';
+}
+
+export default function MainLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [suggestedUsers] = useState<SuggestedUser[]>([
+    {
+      id: 1,
+      name: "Emma Thompson",
+      username: "@emmat",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop",
+      title: "Blockchain Developer"
+    },
+    {
+      id: 2,
+      name: "David Chen",
+      username: "@dchen",
+      avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop",
+      title: "Smart Contract Engineer"
+    },
+    {
+      id: 3,
+      name: "Sarah Miller",
+      username: "@sarahm",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop",
+      title: "DeFi Specialist"
+    }
+  ]);
+
+  const [myConnections] = useState<Connection[]>([
+    {
+      id: 1,
+      name: "Alice Johnson",
+      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop",
+      status: 'online'
+    },
+    {
+      id: 2,
+      name: "Bob Wilson",
+      avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop",
+      status: 'offline'
+    },
+    {
+      id: 3,
+      name: "Carol Smith",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop",
+      status: 'online'
+    }
+  ]);
+
+  const [sentRequests, setSentRequests] = useState<number[]>([]);
+  const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const navigation = [
+    { name: 'Home', href: '/home', icon: Home, notifications: 0 },
+    { name: 'Notifications', href: '/notifications', icon: Bell, notifications: 3 },
+    { name: 'Messages', href: '/messages', icon: MessageCircle, notifications: 2 },
+    { name: 'Profile', href: '/profile', icon: User, notifications: 0 },
+  ];
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className={`fixed top-0 w-full border-b z-50 transition-all duration-200 ${
+        scrolled 
+          ? "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm" 
+          : "bg-background"
+      }`}>
+        <div className="container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2 animate-fade-in">
+            <div className="bg-primary/10 p-1.5 rounded-full">
+              <Share2 className="h-6 w-6 text-primary" />
+            </div>
+            <span className="text-xl font-bold">FILxCONNECT</span>
+          </div>
+          
+          {/* Add the search bar */}
+          <div className="hidden md:flex max-w-md flex-1 mx-8">
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search connections..."
+                className="w-full pl-10 bg-muted/50"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            
+            <div className="md:hidden">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hover-scale">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[80%] sm:w-[350px]">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center gap-4 p-4 border-b">
+                      <Avatar className="h-10 w-10">
+                        <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
+                      </Avatar>
+                      <div>
+                        <h3 className="font-medium">John Doe</h3>
+                        <p className="text-sm text-muted-foreground">@johndoe</p>
+                      </div>
+                    </div>
+                    
+                    <nav className="flex-1 p-4 space-y-2">
+                      {navigation.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = pathname === item.href;
+                        
+                        return (
+                          <Link 
+                            key={item.name} 
+                            href={item.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                          >
+                            <Button
+                              variant={isActive ? 'default' : 'ghost'}
+                              className="w-full justify-start hover-scale"
+                            >
+                              <Icon className="mr-2 h-5 w-5" />
+                              {item.name}
+                              {item.notifications > 0 && (
+                                <Badge variant="destructive" className="ml-auto">
+                                  {item.notifications}
+                                </Badge>
+                              )}
+                            </Button>
+                          </Link>
+                        );
+                      })}
+                    </nav>
+                    
+                    <div className="p-4 border-t">
+                      <Button variant="outline" className="w-full justify-start hover-scale">
+                        <LogOut className="mr-2 h-5 w-5" />
+                        Logout
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+            
+            <div className="hidden md:block">
+              <Button variant="ghost" size="icon" className="hover-scale">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Sidebar Navigation */}
+      <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 border-r p-4 hidden md:block animate-fade-in">
+        <div className="flex items-center gap-3 mb-6 p-2">
+          <Avatar className="h-10 w-10">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
+          </Avatar>
+          <div>
+            <h3 className="font-medium">John Doe</h3>
+            <p className="text-sm text-muted-foreground">@johndoe</p>
+          </div>
+        </div>
+        
+        <nav className="space-y-2">
+          {navigation.map((item, index) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            
+            return (
+              <Link key={item.name} href={item.href}>
+                <Button
+                  variant={isActive ? 'default' : 'ghost'}
+                  className="w-full justify-start hover-scale animate-slide-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <Icon className="mr-2 h-5 w-5" />
+                  {item.name}
+                  {item.notifications > 0 && (
+                    <Badge variant="destructive" className="ml-auto">
+                      {item.notifications}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+            );
+          })}
+        </nav>
+        
+        <div className="mt-8 border-t pt-6">
+          <h3 className="font-semibold mb-4 px-2">My Connections</h3>
+          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            {myConnections.map((connection) => (
+              <Link 
+                key={connection.id} 
+                href={`/profile/${connection.id}`}
+                className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors group"
+              >
+                <div className="relative">
+                  <Avatar className="h-8 w-8">
+                    <img src={connection.avatar} alt={connection.name} />
+                  </Avatar>
+                  <span 
+                    className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background ${
+                      connection.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
+                    }`}
+                  />
+                </div>
+                <span className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                  {connection.name}
+                </span>
+              </Link>
+            ))}
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full mt-4 text-muted-foreground hover:text-primary"
+            onClick={() => setIsConnectionsModalOpen(true)}
+          >
+            View all connections
+          </Button>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 border-t bg-background md:hidden z-10">
+        <nav className="flex justify-around p-2">
+          {navigation.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            
+            return (
+              <Link key={item.name} href={item.href} className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`hover-scale ${isActive ? 'text-primary' : ''}`}
+                >
+                  <Icon className="h-5 w-5" />
+                  {item.notifications > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 text-xs flex items-center justify-center">
+                      {item.notifications}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Main Content */}
+      <main className="pt-16 md:pl-64 md:pr-80 min-h-screen pb-16 md:pb-0">
+        {children}
+      </main>
+
+      {/* Add the People You May Know section */}
+      <div className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 border-l p-4 hidden md:block animate-fade-in">
+        <h3 className="font-semibold mb-4 animate-slide-up">People you may know</h3>
+        <div className="space-y-3">
+          {suggestedUsers.map((user, index) => {
+            const isRequestSent = sentRequests.includes(user.id);
+            
+            return (
+              <Card 
+                key={user.id} 
+                className="p-4 hover-scale transition-all animate-slide-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10">
+                    <img src={user.avatar} alt={user.name} />
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{user.name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{user.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{user.username}</p>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant={isRequestSent ? "ghost" : "ghost"}
+                    className={`hover-scale ml-2 transition-all duration-300 ${
+                      isRequestSent ? "text-green-500" : ""
+                    }`}
+                    onClick={() => {
+                      if (!isRequestSent) {
+                        setSentRequests(prev => [...prev, user.id]);
+                      }
+                    }}
+                    disabled={isRequestSent}
+                  >
+                    <div className="relative w-4 h-4">
+                      <div className={`absolute inset-0 transition-all duration-300 transform ${
+                        isRequestSent ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                      }`}>
+                        <Check className="h-4 w-4" />
+                      </div>
+                      <div className={`absolute inset-0 transition-all duration-300 transform ${
+                        isRequestSent ? "opacity-0 scale-0" : "opacity-100 scale-100"
+                      }`}>
+                        <UserPlus className="h-4 w-4" />
+                      </div>
+                    </div>
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+        <p className="text-sm text-muted-foreground text-center mt-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <Link href="/discover" className="hover:text-primary transition-colors">
+            View more suggestions →
+          </Link>
+        </p>
+      </div>
+
+      <Dialog open={isConnectionsModalOpen} onOpenChange={setIsConnectionsModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              My Connections
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="relative my-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search connections..."
+              className="w-full pl-10 bg-muted/50"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-2">
+            <div className="space-y-3">
+              {myConnections
+                .filter(connection => 
+                  connection.name.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .map((connection) => (
+                  <div
+                    key={connection.id}
+                    className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted transition-all duration-200"
+                  >
+                    <div className="relative">
+                      <Avatar className="h-12 w-12">
+                        <img src={connection.avatar} alt={connection.name} />
+                      </Avatar>
+                      <span 
+                        className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${
+                          connection.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
+                        }`}
+                      />
+                    </div>
+                    
+                    <div className="flex-1">
+                      <h4 className="font-medium">{connection.name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {connection.status === 'online' ? 'Active now' : 'Offline'}
+                      </p>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hover:bg-primary/10 hover:text-primary"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
