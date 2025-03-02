@@ -148,9 +148,12 @@ export default function ProfilePage() {
 
           {/* Profile Info */}
           <div className="flex-1 text-center md:text-left">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <h1 className="text-3xl font-bold mb-4 md:mb-0">{userProfile.name}</h1>
-              <div className="flex gap-2 justify-center md:justify-start">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+              <div className="space-y-2">
+                <h1 className="text-3xl font-bold mb-2">{userProfile.name}</h1>
+                <p className="text-muted-foreground">{userProfile.bio}</p>
+              </div>
+              <div className="flex gap-2 justify-center md:justify-start mt-4 md:mt-0">
                 <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="shadow-lg hover:shadow-xl transition-all duration-200">
@@ -216,7 +219,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Stats */}
-            <div className="flex gap-6 justify-center md:justify-start">
+            <div className="flex gap-6 justify-center md:justify-start mt-6">
               <div className="text-center md:text-left">
                 <div className="text-2xl font-bold">{userProfile.stats.posts}</div>
                 <div className="text-sm text-muted-foreground">Posts</div>
