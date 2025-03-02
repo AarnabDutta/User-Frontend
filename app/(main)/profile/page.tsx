@@ -42,89 +42,89 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Cover Photo */}
-      <div className="relative h-48 md:h-64 rounded-b-xl overflow-hidden">
-        <img
-          src={userProfile.coverPhoto}
-          alt="Cover"
-          className="w-full h-full object-cover"
-        />
-        <Button
-          size="icon"
-          variant="secondary"
-          className="absolute top-4 right-4"
-        >
-          <Camera className="h-4 w-4" />
-        </Button>
+    <div className="max-w-4xl mx-auto animate-fade-in">
+      {/* Profile Header */}
+      <div className="px-4 pt-8 pb-4 bg-gradient-to-b from-primary/5 to-background rounded-b-3xl">
+        <div className="flex flex-col items-center md:flex-row md:items-start md:gap-8">
+          {/* Profile Photo */}
+          <div className="relative mb-6 md:mb-0">
+            <Avatar className="w-40 h-40 border-4 border-background shadow-xl hover:scale-105 transition-transform duration-200">
+              <img 
+                src={userProfile.avatar} 
+                alt={userProfile.name}
+                className="object-cover"
+              />
+            </Avatar>
+            <Button
+              size="icon"
+              variant="secondary"
+              className="absolute bottom-2 right-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+            >
+              <Camera className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Profile Info */}
+          <div className="flex-1 text-center md:text-left">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+              <h1 className="text-3xl font-bold mb-4 md:mb-0">{userProfile.name}</h1>
+              <div className="flex gap-2 justify-center md:justify-start">
+                <Button className="shadow-lg hover:shadow-xl transition-all duration-200">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  className="shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="flex gap-8 justify-center md:justify-start">
+              <div className="text-center md:text-left">
+                <div className="text-2xl font-bold">{userProfile.stats.posts}</div>
+                <div className="text-sm text-muted-foreground">Posts</div>
+              </div>
+              <div className="text-center md:text-left">
+                <div className="text-2xl font-bold">{userProfile.stats.followers}</div>
+                <div className="text-sm text-muted-foreground">Followers</div>
+              </div>
+              <div className="text-center md:text-left">
+                <div className="text-2xl font-bold">{userProfile.stats.following}</div>
+                <div className="text-sm text-muted-foreground">Following</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Profile Info */}
-      <div className="px-4">
-        <div className="relative -mt-20 mb-4">
-          <Avatar className="w-32 h-32 border-4 border-background">
-            <img src={userProfile.avatar} alt={userProfile.name} />
-          </Avatar>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="absolute bottom-0 right-0"
-          >
-            <Camera className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="flex justify-between items-start mb-6">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold">{userProfile.name}</h1>
-          </div>
-          <div className="flex gap-2">
-            <Button>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
-            <Button variant="outline" size="icon">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex gap-6 mb-6">
-          <div className="text-center">
-            <div className="font-bold">{userProfile.stats.posts}</div>
-            <div className="text-sm text-muted-foreground">Posts</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold">{userProfile.stats.followers}</div>
-            <div className="text-sm text-muted-foreground">Followers</div>
-          </div>
-          <div className="text-center">
-            <div className="font-bold">{userProfile.stats.following}</div>
-            <div className="text-sm text-muted-foreground">Following</div>
-          </div>
-        </div>
-
+      {/* Tabs Section */}
+      <div className="px-4 mt-6">
         <Tabs defaultValue="posts" className="space-y-6">
-          <TabsList className="w-full justify-start h-12 p-1">
-            <TabsTrigger value="posts" className="flex-1">Posts</TabsTrigger>
-            <TabsTrigger value="media" className="flex-1">Media</TabsTrigger>
-            <TabsTrigger value="likes" className="flex-1">Likes</TabsTrigger>
+          <TabsList className="w-full justify-start h-12 p-1 bg-primary/5 rounded-xl">
+            <TabsTrigger value="posts" className="flex-1 rounded-lg">Posts</TabsTrigger>
+            <TabsTrigger value="media" className="flex-1 rounded-lg">Media</TabsTrigger>
+            <TabsTrigger value="likes" className="flex-1 rounded-lg">Likes</TabsTrigger>
           </TabsList>
 
           <TabsContent value="posts" className="space-y-4">
             {posts.map((post) => (
-              <Card key={post.id} className="p-4">
-                <p className="mb-4">{post.content}</p>
-                <div className="text-sm text-muted-foreground mb-4">{post.time}</div>
+              <Card key={post.id} className="p-6 hover:shadow-lg transition-all duration-200">
+                <p className="mb-4 text-lg">{post.content}</p>
+                <div className="text-sm text-muted-foreground">{post.time}</div>
                 <Separator className="my-4" />
                 <div className="flex justify-between">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="hover:text-primary">
                     👍 {post.likes}
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="hover:text-primary">
                     💬 {post.comments}
                   </Button>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="hover:text-primary">
                     ↗️ {post.shares}
                   </Button>
                 </div>
