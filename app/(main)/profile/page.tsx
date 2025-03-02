@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function ProfilePage() {
-  const userProfile = {
+  const [userProfile, setUserProfile] = useState({
     name: 'John Doe',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
     bio: 'Web3 Developer | Blockchain Enthusiast',
@@ -28,7 +28,7 @@ export default function ProfilePage() {
       following: 567,
       reports: 2
     }
-  };
+  });
 
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -97,8 +97,11 @@ export default function ProfilePage() {
   const handleProfileUpdate = () => {
     try {
       // Here you would typically make an API call to update the profile
-      userProfile.name = editForm.name;
-      userProfile.bio = editForm.bio;
+      setUserProfile(prev => ({
+        ...prev,
+        name: editForm.name,
+        bio: editForm.bio
+      }));
       setIsEditDialogOpen(false);
       toast.success('Profile updated successfully');
     } catch (error) {
