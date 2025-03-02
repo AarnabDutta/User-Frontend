@@ -18,7 +18,8 @@ export default function ProfilePage() {
     stats: {
       posts: 142,
       followers: 1234,
-      following: 567
+      following: 567,
+      reports: 2
     }
   };
 
@@ -84,7 +85,7 @@ export default function ProfilePage() {
             </div>
 
             {/* Stats */}
-            <div className="flex gap-8 justify-center md:justify-start">
+            <div className="flex gap-6 justify-center md:justify-start">
               <div className="text-center md:text-left">
                 <div className="text-2xl font-bold">{userProfile.stats.posts}</div>
                 <div className="text-sm text-muted-foreground">Posts</div>
@@ -96,6 +97,10 @@ export default function ProfilePage() {
               <div className="text-center md:text-left">
                 <div className="text-2xl font-bold">{userProfile.stats.following}</div>
                 <div className="text-sm text-muted-foreground">Following</div>
+              </div>
+              <div className="text-center md:text-left">
+                <div className="text-2xl font-bold text-destructive">{userProfile.stats.reports}</div>
+                <div className="text-sm text-muted-foreground">Reports</div>
               </div>
             </div>
           </div>
