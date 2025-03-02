@@ -4,13 +4,11 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Camera, Edit, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function ProfilePage() {
-  const [activeTab, setActiveTab] = useState('posts');
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -160,50 +158,32 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Tabs Section */}
+      {/* Posts Section */}
       <div className="px-4 mt-6">
-        <Tabs defaultValue="posts" className="space-y-6">
-          <TabsList className="w-full justify-start h-12 p-1 bg-primary/5 rounded-xl">
-            <TabsTrigger value="posts" className="flex-1 rounded-lg">Posts</TabsTrigger>
-            <TabsTrigger value="media" className="flex-1 rounded-lg">Media</TabsTrigger>
-            <TabsTrigger value="likes" className="flex-1 rounded-lg">Likes</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="posts" className="space-y-4">
-            {posts.map((post) => (
-              <Card key={post.id} className="p-6 hover:shadow-lg transition-all duration-200">
-                <p className="mb-4 text-lg">{post.content}</p>
-                <div className="text-sm text-muted-foreground">{post.time}</div>
-                <Separator className="my-4" />
-                <div className="flex justify-between">
-                  <Button variant="ghost" size="sm" className="hover:text-primary">
-                    👍 {post.likes}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="hover:text-primary">
-                    💬 {post.comments}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="hover:text-primary">
-                    ↗️ {post.shares}
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </TabsContent>
-
-          <TabsContent value="media">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="aspect-square rounded-lg bg-muted" />
-              <div className="aspect-square rounded-lg bg-muted" />
-              <div className="aspect-square rounded-lg bg-muted" />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="likes">
-            <div className="text-center py-12 text-muted-foreground">
-              No liked posts yet
-            </div>
-          </TabsContent>
-        </Tabs>
+        <h2 className="text-xl font-semibold mb-4 text-center">Posts</h2>
+        <div className="space-y-4">
+          {posts.map((post) => (
+            <Card 
+              key={post.id} 
+              className="p-6 hover:shadow-lg transition-all duration-200 bg-background/60 backdrop-blur-sm"
+            >
+              <p className="mb-4 text-lg text-center">{post.content}</p>
+              <div className="text-sm text-muted-foreground text-center">{post.time}</div>
+              <Separator className="my-4" />
+              <div className="flex justify-between">
+                <Button variant="ghost" size="sm" className="hover:text-primary">
+                  👍 {post.likes}
+                </Button>
+                <Button variant="ghost" size="sm" className="hover:text-primary">
+                  💬 {post.comments}
+                </Button>
+                <Button variant="ghost" size="sm" className="hover:text-primary">
+                  ↗️ {post.shares}
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
