@@ -24,6 +24,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth'; // Make sure you have this hook
 import Image from 'next/image';
+import { ProgressTimer } from '@/components/ui/progress-timer';
 
 interface SuggestedUser {
   id: number;
@@ -94,6 +95,7 @@ export default function MainLayout({
   ]);
 
   const [sentRequests, setSentRequests] = useState<number[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<number[]>([]);
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSuggestionsModalOpen, setIsSuggestionsModalOpen] = useState(false);
@@ -403,23 +405,32 @@ export default function MainLayout({
                       isRequestSent ? "text-green-500" : ""
                     }`}
                     onClick={() => {
-                      if (!isRequestSent) {
-                        setSentRequests(prev => [...prev, user.id]);
+                      if (!isRequestSent && !pendingRequests.includes(user.id)) {
+                        setPendingRequests(prev => [...prev, user.id]);
+                        setTimeout(() => {
+                          setPendingRequests(prev => prev.filter(id => id !== user.id));
+                          setSentRequests(prev => [...prev, user.id]);
+                        }, 3000);
                       }
                     }}
-                    disabled={isRequestSent}
+                    disabled={isRequestSent || pendingRequests.includes(user.id)}
                   >
-                    <div className="relative w-4 h-4">
-                      <div className={`absolute inset-0 transition-all duration-300 transform ${
-                        isRequestSent ? "opacity-100 scale-100" : "opacity-0 scale-0"
-                      }`}>
-                        <Check className="h-4 w-4" />
-                      </div>
-                      <div className={`absolute inset-0 transition-all duration-300 transform ${
-                        isRequestSent ? "opacity-0 scale-0" : "opacity-100 scale-100"
-                      }`}>
-                        <UserPlus className="h-4 w-4" />
-                      </div>
+                    <div className="relative w-5 h-5">
+                      {pendingRequests.includes(user.id) ? (
+                        <ProgressTimer
+                          duration={3}
+                          onComplete={() => {
+                            setPendingRequests(prev => prev.filter(id => id !== user.id));
+                            setSentRequests(prev => [...prev, user.id]);
+                          }}
+                        />
+                      ) : (
+                        <div className={`absolute inset-0 transition-all duration-300 transform ${
+                          isRequestSent ? "opacity-0 scale-0" : "opacity-100 scale-100"
+                        }`}>
+                          <UserPlus className="h-5 w-5" />
+                        </div>
+                      )}
                     </div>
                   </Button>
                 </div>
