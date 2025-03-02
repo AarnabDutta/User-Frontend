@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Camera, Link as LinkIcon, MapPin, Calendar, Edit, Settings } from 'lucide-react';
+import { Camera, Edit, Settings } from 'lucide-react';
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('posts');
@@ -15,10 +15,6 @@ export default function ProfilePage() {
     name: 'John Doe',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
     coverPhoto: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1470&auto=format&fit=crop',
-    bio: 'Senior Software Engineer | Blockchain Enthusiast | Web3 Developer',
-    location: 'San Francisco, CA',
-    website: 'johndoe.dev',
-    joinDate: 'Joined January 2024',
     stats: {
       posts: 142,
       followers: 1234,
@@ -81,21 +77,6 @@ export default function ProfilePage() {
         <div className="flex justify-between items-start mb-6">
           <div className="space-y-2">
             <h1 className="text-2xl font-bold">{userProfile.name}</h1>
-            <p className="text-muted-foreground">{userProfile.bio}</p>
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
-                {userProfile.location}
-              </span>
-              <span className="flex items-center gap-1">
-                <LinkIcon className="h-4 w-4" />
-                {userProfile.website}
-              </span>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {userProfile.joinDate}
-              </span>
-            </div>
           </div>
           <div className="flex gap-2">
             <Button>
