@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Camera, Edit, Settings } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('posts');
+  const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const userProfile = {
     name: 'John Doe',
@@ -42,6 +45,43 @@ export default function ProfilePage() {
     }
   ];
 
+  const handleProfilePhotoUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    // File validation
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+  
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+  
+    try {
+      setIsUpdatingPhoto(true);
+      
+      // Create a preview URL
+      const previewUrl = URL.createObjectURL(file);
+      
+      // Here you would typically:
+      // 1. Upload the file to your storage
+      // 2. Get the uploaded file URL
+      // 3. Update the user profile with new photo URL
+      // For now, we'll just update the local state
+      
+      userProfile.avatar = previewUrl;
+      toast.success('Profile photo updated successfully');
+    } catch (error) {
+      toast.error('Failed to update profile photo');
+      console.error(error);
+    } finally {
+      setIsUpdatingPhoto(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
       {/* Profile Header */}
@@ -56,12 +96,25 @@ export default function ProfilePage() {
                 className="object-cover"
               />
             </Avatar>
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/*"
+              onChange={handleProfilePhotoUpdate}
+            />
             <Button
               size="icon"
               variant="secondary"
               className="absolute bottom-2 right-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUpdatingPhoto}
             >
-              <Camera className="h-4 w-4" />
+              {isUpdatingPhoto ? (
+                <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+              ) : (
+                <Camera className="h-4 w-4" />
+              )}
             </Button>
           </div>
 
