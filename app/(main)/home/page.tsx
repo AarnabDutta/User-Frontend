@@ -389,11 +389,11 @@ export default function HomePage() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
                   <Flag className="h-4 w-4 mr-2" />
-                  Report
+                  Report Post
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
+                  <Flag className="h-4 w-4 mr-2" />
+                  Report User
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
