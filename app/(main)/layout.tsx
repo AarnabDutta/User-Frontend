@@ -290,7 +290,7 @@ export default function MainLayout({
 
       {/* Sidebar Navigation */}
       <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 p-4 hidden md:block animate-fade-in">
-        <div className="flex items-center gap-3 mb-6 p-2">
+        <div className="flex items-center gap-3 mb-4 p-2">
           <Avatar className="h-10 w-10">
             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
           </Avatar>
@@ -300,7 +300,7 @@ export default function MainLayout({
           </div>
         </div>
         
-        <nav className="space-y-2">
+        <nav className="space-y-1 mb-4">
           {navigation.map((item, index) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -334,9 +334,9 @@ export default function MainLayout({
           })}
         </nav>
         
-        <div className="mt-8 pt-6">
-          <h3 className="font-semibold mb-4 px-2">My Connections</h3>
-          <div className="space-y-2 max-h-[300px] overflow-y-auto">
+        <div className="mt-0">
+          <h3 className="font-semibold mb-2 px-2">My Connections</h3>
+          <div className="space-y-1 max-h-[200px] overflow-y-auto">
             {myConnections.map((connection) => (
               <Link 
                 key={connection.id} 
@@ -362,7 +362,7 @@ export default function MainLayout({
           <Button 
             variant="ghost" 
             size="sm" 
-            className="w-full mt-4 text-muted-foreground hover:text-primary"
+            className="w-full mt-2 text-muted-foreground hover:text-primary"
             onClick={() => setIsConnectionsModalOpen(true)}
           >
             View all connections
