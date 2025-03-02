@@ -2,7 +2,7 @@
 
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { Share2, Home, Bell, MessageCircle, User, LogOut, Menu, Search, Check, UserPlus } from 'lucide-react';
+import { Share2, Home, Bell, MessageCircle, User, LogOut, Menu, Search, Check, UserPlus, PenSquare, Clock, CheckCircle, XCircle, List } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -25,6 +25,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth'; // Make sure you have this hook
 import Image from 'next/image';
 import { ProgressTimer } from '@/components/ui/progress-timer';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SuggestedUser {
   id: number;
@@ -100,12 +101,14 @@ export default function MainLayout({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSuggestionsModalOpen, setIsSuggestionsModalOpen] = useState(false);
   const [suggestionsSearchQuery, setSuggestionsSearchQuery] = useState("");
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
   const navigation = [
     { name: 'Home', href: '/home', icon: Home, notifications: 0 },
     { name: 'Notifications', href: '/notifications', icon: Bell, notifications: 3 },
     { name: 'Messages', href: '/messages', icon: MessageCircle, notifications: 2 },
     { name: 'Profile', href: '/profile', icon: User, notifications: 0 },
+    { name: 'Post', href: '#', icon: PenSquare, notifications: 0 },
   ];
 
   const allSuggestedUsers: SuggestedUser[] = [
@@ -142,6 +145,14 @@ export default function MainLayout({
 
   const router = useRouter();
   const { signOut } = useAuth();
+
+  const handleNavClick = (href: string, name: string) => {
+    if (name === 'Post') {
+      setIsPostModalOpen(true);
+    } else {
+      router.push(href);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -216,8 +227,14 @@ export default function MainLayout({
                         return (
                           <Link 
                             key={item.name} 
-                            href={item.href}
-                            onClick={() => setMobileMenuOpen(false)}
+                            href={item.href} 
+                            className="relative"
+                            onClick={(e) => {
+                              if (item.name === 'Post') {
+                                e.preventDefault();
+                                setIsPostModalOpen(true);
+                              }
+                            }}
                           >
                             <Button
                               variant={isActive ? 'default' : 'ghost'}
@@ -289,7 +306,16 @@ export default function MainLayout({
             const isActive = pathname === item.href;
             
             return (
-              <Link key={item.name} href={item.href}>
+              <Link 
+                key={item.name} 
+                href={item.href}
+                onClick={(e) => {
+                  if (item.name === 'Post') {
+                    e.preventDefault();
+                    setIsPostModalOpen(true);
+                  }
+                }}
+              >
                 <Button
                   variant={isActive ? 'default' : 'ghost'}
                   className="w-full justify-start hover-scale animate-slide-up"
@@ -352,7 +378,17 @@ export default function MainLayout({
             const isActive = pathname === item.href;
             
             return (
-              <Link key={item.name} href={item.href} className="relative">
+              <Link 
+                key={item.name} 
+                href={item.href} 
+                className="relative"
+                onClick={(e) => {
+                  if (item.name === 'Post') {
+                    e.preventDefault();
+                    setIsPostModalOpen(true);
+                  }
+                }}
+              >
                 <Button
                   variant="ghost"
                   size="icon"
@@ -579,6 +615,74 @@ export default function MainLayout({
                   );
                 })}
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isPostModalOpen} onOpenChange={setIsPostModalOpen}>
+        <DialogContent className="max-w-4xl h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold mb-4">My Posts</DialogTitle>
+            <Tabs defaultValue="pending" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="pending" className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Pending
+                </TabsTrigger>
+                <TabsTrigger value="approved" className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Approved
+                </TabsTrigger>
+                <TabsTrigger value="rejected" className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4" />
+                  Rejected
+                </TabsTrigger>
+                <TabsTrigger value="all" className="flex items-center gap-2">
+                  <List className="h-4 w-4" />
+                  All Posts
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="pending" className="flex-1 overflow-y-auto mt-4">
+                <div className="space-y-4">
+                  {/* Pending posts will go here */}
+                  <Card className="p-4">
+                    <p className="text-muted-foreground">No pending posts</p>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="approved" className="flex-1 overflow-y-auto mt-4">
+                <div className="space-y-4">
+                  {/* Approved posts will go here */}
+                  <Card className="p-4">
+                    <p className="text-muted-foreground">No approved posts</p>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="rejected" className="flex-1 overflow-y-auto mt-4">
+                <div className="space-y-4">
+                  {/* Rejected posts will go here */}
+                  <Card className="p-4">
+                    <p className="text-muted-foreground">No rejected posts</p>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="all" className="flex-1 overflow-y-auto mt-4">
+                <div className="space-y-4">
+                  {/* All posts will go here */}
+                  <Card className="p-4">
+                    <p className="text-muted-foreground">No posts found</p>
+                  </Card>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </DialogHeader>
+
+          <div className="mt-auto pt-4 flex justify-end">
+            <Button onClick={() => setIsPostModalOpen(false)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>
