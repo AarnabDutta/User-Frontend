@@ -572,7 +572,7 @@ export default function MainLayout({
                           ) : (
                             <UserPlus className="h-4 w-4" />
                           )}
-                          <span className="ml-2">{isRequestSent ? 'Connected' : 'Connect'}</span>
+                          <span className="ml-2">{isRequestSent ? 'Request Sent' : 'Connect'}</span>
                         </Button>
                       </div>
                     </Card>

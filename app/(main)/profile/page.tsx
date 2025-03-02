@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Camera, Edit, Settings } from 'lucide-react';
+import { Camera, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -19,9 +19,9 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState({
-    name: 'John Doe',
+    name: 'Aarnab Dutta',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
-    bio: 'Web3 Developer | Blockchain Enthusiast',
+    bio: 'Team Lead | Frontend Developer',
     stats: {
       posts: 142,
       followers: 1234,
@@ -208,6 +208,7 @@ export default function ProfilePage() {
                     </div>
                   </DialogContent>
                 </Dialog>
+                {/* Commented out Settings button
                 <Button 
                   variant="outline" 
                   size="icon"
@@ -215,6 +216,7 @@ export default function ProfilePage() {
                 >
                   <Settings className="h-4 w-4" />
                 </Button>
+                */}
               </div>
             </div>
 
@@ -248,19 +250,19 @@ export default function ProfilePage() {
           {posts.map((post) => (
             <Card 
               key={post.id} 
-              className="p-6 hover:shadow-lg transition-all duration-200 bg-background/60 backdrop-blur-sm"
+              className="p-6 hover:shadow-lg transition-all duration-200 bg-background/60 backdrop-blur-sm rounded-xl" // Added rounded-xl
             >
               <p className="mb-4 text-lg text-center">{post.content}</p>
               <div className="text-sm text-muted-foreground text-center">{post.time}</div>
               <Separator className="my-4" />
               <div className="flex justify-between">
-                <Button variant="ghost" size="sm" className="hover:text-primary">
+                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg"> {/* Added rounded-lg */}
                   👍 {post.likes}
                 </Button>
-                <Button variant="ghost" size="sm" className="hover:text-primary">
+                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg"> {/* Added rounded-lg */}
                   💬 {post.comments}
                 </Button>
-                <Button variant="ghost" size="sm" className="hover:text-primary">
+                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg"> {/* Added rounded-lg */}
                   ↗️ {post.shares}
                 </Button>
               </div>
