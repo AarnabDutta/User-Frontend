@@ -7,15 +7,21 @@ import { Avatar } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Camera, Edit, Settings } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ProfilePage() {
-  const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const userProfile = {
     name: 'John Doe',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
-    coverPhoto: 'https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=1470&auto=format&fit=crop',
+    bio: 'Web3 Developer | Blockchain Enthusiast',
     stats: {
       posts: 142,
       followers: 1234,
@@ -23,6 +29,14 @@ export default function ProfilePage() {
       reports: 2
     }
   };
+
+  const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: userProfile.name,
+    bio: userProfile.bio || ''
+  });
 
   const posts = [
     {
@@ -80,6 +94,19 @@ export default function ProfilePage() {
     }
   };
 
+  const handleProfileUpdate = () => {
+    try {
+      // Here you would typically make an API call to update the profile
+      userProfile.name = editForm.name;
+      userProfile.bio = editForm.bio;
+      setIsEditDialogOpen(false);
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      toast.error('Failed to update profile');
+      console.error(error);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
       {/* Profile Header */}
@@ -121,10 +148,60 @@ export default function ProfilePage() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
               <h1 className="text-3xl font-bold mb-4 md:mb-0">{userProfile.name}</h1>
               <div className="flex gap-2 justify-center md:justify-start">
-                <Button className="shadow-lg hover:shadow-xl transition-all duration-200">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
+                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="shadow-lg hover:shadow-xl transition-all duration-200">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-semibold">Edit Profile</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <label htmlFor="name" className="text-sm font-medium">
+                          Name
+                        </label>
+                        <Input
+                          id="name"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                          placeholder="Enter your name"
+                          className="col-span-3"
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <label htmlFor="bio" className="text-sm font-medium">
+                          Bio
+                        </label>
+                        <Textarea
+                          id="bio"
+                          value={editForm.bio}
+                          onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                          placeholder="Tell us about yourself"
+                          className="col-span-3 resize-none"
+                          rows={4}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsEditDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleProfileUpdate}
+                        disabled={!editForm.name.trim()}
+                      >
+                        Save changes
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 <Button 
                   variant="outline" 
                   size="icon"
