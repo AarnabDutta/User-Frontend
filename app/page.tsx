@@ -7,7 +7,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push('/login');
+    router.push('/landing');
   }, [router]);
 
   // Optional: Show loading state while redirecting
