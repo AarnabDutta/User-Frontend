@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState({
@@ -38,12 +39,34 @@ export default function ProfilePage() {
     bio: userProfile.bio || ''
   });
 
-  const posts = [
+  interface Like {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+  }
+
+  const [posts, setPosts] = useState([
     {
       id: 1,
       content: 'Excited to announce that our team has just completed a major milestone in our blockchain project! 🚀 #blockchain #innovation',
       time: '2h ago',
       likes: 24,
+      likedBy: [
+        {
+          id: '1',
+          name: 'John Doe',
+          username: '@johndoe',
+          avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop'
+        },
+        {
+          id: '2',
+          name: 'Jane Smith',
+          username: '@janesmith',
+          avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop'
+        },
+        // ... more users
+      ],
       comments: 5,
       shares: 2
     },
@@ -52,10 +75,28 @@ export default function ProfilePage() {
       content: 'Just published my latest article on Web3 development. Check it out and let me know your thoughts! 📝 #web3 #development',
       time: '4h ago',
       likes: 42,
+      likedBy: [
+        {
+          id: '3',
+          name: 'Alice Johnson',
+          username: '@alicejohnson',
+          avatar: 'https://images.unsplash.com/photo-1502767089025-6572583495b9?q=80&w=100&auto=format&fit=crop'
+        },
+        {
+          id: '4',
+          name: 'Bob Brown',
+          username: '@bobbrown',
+          avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=100&auto=format&fit=crop'
+        },
+        // ... more users
+      ],
       comments: 8,
       shares: 6
     }
-  ];
+  ]);
+
+  const [activeLikesPost, setActiveLikesPost] = useState<number | null>(null);
+  const [isFriend, setIsFriend] = useState(true); // Add this state
 
   const handleProfilePhotoUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,6 +149,14 @@ export default function ProfilePage() {
       toast.error('Failed to update profile');
       console.error(error);
     }
+  };
+
+  const handleLikeClick = (postId: number) => {
+    if (!isFriend) {
+      toast.error("Only friends can like posts");
+      return;
+    }
+    // Rest of your like handling logic
   };
 
   return (
@@ -250,19 +299,59 @@ export default function ProfilePage() {
           {posts.map((post) => (
             <Card 
               key={post.id} 
-              className="p-6 hover:shadow-lg transition-all duration-200 bg-background/60 backdrop-blur-sm rounded-xl" // Added rounded-xl
+              className="p-6 hover:shadow-lg transition-all duration-200 bg-background/60 backdrop-blur-sm rounded-xl"
             >
               <p className="mb-4 text-lg text-center">{post.content}</p>
               <div className="text-sm text-muted-foreground text-center">{post.time}</div>
               <Separator className="my-4" />
               <div className="flex justify-between">
-                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg"> {/* Added rounded-lg */}
-                  👍 {post.likes}
-                </Button>
-                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg"> {/* Added rounded-lg */}
+                <Dialog open={activeLikesPost === post.id} onOpenChange={(open) => setActiveLikesPost(open ? post.id : null)}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="hover:text-primary rounded-lg"
+                      onClick={() => handleLikeClick(post.id)}
+                    >
+                      👍 {post.likes}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-semibold">
+                        Liked by {post.likes} people
+                      </DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea className="max-h-[60vh] pr-4">
+                      <div className="space-y-4 mt-4">
+                        {post.likedBy?.map((user) => (
+                          <div key={user.id} className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors">
+                            <Avatar className="h-10 w-10">
+                              <img src={user.avatar} alt={user.name} className="object-cover" />
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{user.name}</p>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {user.username}
+                              </p>
+                            </div>
+                            {/* <Button
+                              variant="outline"
+                              size="sm"
+                              className="ml-auto"
+                            >
+                              Follow
+                            </Button> */}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
+                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg">
                   💬 {post.comments}
                 </Button>
-                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg"> {/* Added rounded-lg */}
+                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg">
                   ↗️ {post.shares}
                 </Button>
               </div>
