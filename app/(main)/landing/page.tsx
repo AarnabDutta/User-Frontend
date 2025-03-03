@@ -36,7 +36,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto pt-4">
                     <div className="bg-white/60 backdrop-blur-md rounded-2xl shadow-sm">
                         <div className="flex justify-between h-16 items-center px-4">
-                            <div className="flex items-center">
+                            <div className="flex items-center space-x-3">
                                 <img
                                     src="/logo.png"
                                     alt="FILxCONNECT"
@@ -47,6 +47,7 @@ export default function LandingPage() {
                                         target.src = '/'; // Optional fallback
                                     }}
                                 />
+                                <span className="text-2xl font-bold text-blue-600">FILxCONNECT</span>
                             </div>
 
                             {/* Desktop Navigation */}
