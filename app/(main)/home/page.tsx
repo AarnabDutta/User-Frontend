@@ -166,8 +166,12 @@ export default function HomePage() {
   };
 
   const handleComment = (postId: number) => {
-    setActiveCommentId(activeCommentId === postId ? null : postId);
-    setCommentText('');
+    if (activeCommentId === postId) {
+      setActiveCommentId(null);
+    } else {
+      setActiveCommentId(postId);
+      setCommentText(''); // Clear comment text when switching posts
+    }
   };
 
   // Then update the submitComment function
@@ -489,68 +493,66 @@ export default function HomePage() {
             </Dialog>
           </div>
           
-          {activeCommentId === post.id && (
-            <div className="mt-4 space-y-4">
-              {/* Existing Comments */}
-              <div className="space-y-4">
-                {post.commentsList.map((comment) => (
-                  <div key={comment.id} className="flex gap-3 animate-fade-in">
-                    <Avatar className="w-8 h-8">
-                      <img src={comment.avatar} alt={comment.author} />
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="bg-muted p-3 rounded-lg">
-                        <div className="flex justify-between items-start mb-1">
-                          <h4 className="font-medium text-sm">{comment.author}</h4>
-                          <span className="text-xs text-muted-foreground">{comment.time}</span>
+          <Dialog open={activeCommentId === post.id} onOpenChange={(open) => setActiveCommentId(open ? post.id : null)}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Comments ({post.comments})</DialogTitle>
+              </DialogHeader>
+              <div className="max-h-[60vh] overflow-y-auto pr-4">
+                {/* Existing Comments */}
+                <div className="space-y-4 mb-4">
+                  {post.commentsList.map((comment) => (
+                    <div key={comment.id} className="flex gap-3 animate-fade-in">
+                      <Avatar className="w-8 h-8">
+                        <img src={comment.avatar} alt={comment.author} />
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="bg-muted p-3 rounded-lg">
+                          <div className="flex justify-between items-start mb-1">
+                            <h4 className="font-medium text-sm">{comment.author}</h4>
+                            <span className="text-xs text-muted-foreground">{comment.time}</span>
+                          </div>
+                          <p className="text-sm">{comment.content}</p>
                         </div>
-                        <p className="text-sm">{comment.content}</p>
-                      </div>
-                      <div className="flex gap-4 mt-1">
-                        <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                          Like
-                        </button>
-                        <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
-                          Reply
-                        </button>
+                        <div className="flex gap-4 mt-1">
+                          <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                            Like
+                          </button>
+                          <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                            Reply
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              {/* New Comment Input */}
-              <div className="flex gap-3">
-                <Avatar className="w-8 h-8">
-                  <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
-                </Avatar>
-                <div className="flex-1 space-y-2">
-                  <Input 
-                    placeholder="Write a comment..." 
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    className="bg-muted/50"
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setActiveCommentId(null)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => submitComment(post.id)}
-                      disabled={!commentText.trim()}
-                    >
-                      Comment
-                    </Button>
+                {/* Comment Input */}
+                <div className="flex gap-3 pt-4 border-t">
+                  <Avatar className="w-8 h-8">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
+                  </Avatar>
+                  <div className="flex-1 space-y-2">
+                    <Input 
+                      placeholder="Write a comment..." 
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      className="bg-muted/50"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        size="sm"
+                        onClick={() => submitComment(post.id)}
+                        disabled={!commentText.trim()}
+                      >
+                        Comment
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            </DialogContent>
+          </Dialog>
         </Card>
       ))}
     </div>

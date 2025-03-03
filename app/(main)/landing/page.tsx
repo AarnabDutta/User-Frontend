@@ -342,11 +342,11 @@ export default function LandingPage() {
                         </p>
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                             {[
-                                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200&h=200",
+                                "/Divyansh_photo1[1].jpg",
                                 "/Sanskar Sisodia.png",
                                 "/passport photo.jpg",
-                                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200",
-                                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200&h=200"
+                                "/IMG_3941.PNG",
+                                "/abhijeet.png"
                             ].map((image, index) => (
                                 <motion.div
                                     key={index}
