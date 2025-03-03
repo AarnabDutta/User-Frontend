@@ -46,6 +46,17 @@ export default function ProfilePage() {
     avatar: string;
   }
 
+  interface Comment {
+    id: string;
+    user: {
+      name: string;
+      username: string;
+      avatar: string;
+    };
+    content: string;
+    timestamp: string;
+  }
+
   const [posts, setPosts] = useState([
     {
       id: 1,
@@ -68,6 +79,19 @@ export default function ProfilePage() {
         // ... more users
       ],
       comments: 5,
+      commentsList: [
+        {
+          id: '1',
+          user: {
+            name: 'John Doe',
+            username: '@johndoe',
+            avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop'
+          },
+          content: 'This is amazing! Congratulations on the milestone! 🎉',
+          timestamp: '2h ago'
+        },
+        // Add more comments as needed
+      ],
       shares: 2
     },
     {
@@ -91,11 +115,25 @@ export default function ProfilePage() {
         // ... more users
       ],
       comments: 8,
+      commentsList: [
+        {
+          id: '1',
+          user: {
+            name: 'John Doe',
+            username: '@johndoe',
+            avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop'
+          },
+          content: 'Great article! Very informative.',
+          timestamp: '3h ago'
+        },
+        // Add more comments as needed
+      ],
       shares: 6
     }
   ]);
 
   const [activeLikesPost, setActiveLikesPost] = useState<number | null>(null);
+  const [activeCommentsPost, setActiveCommentsPost] = useState<number | null>(null);
   const [isFriend, setIsFriend] = useState(true); // Add this state
 
   const handleProfilePhotoUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -348,9 +386,62 @@ export default function ProfilePage() {
                     </ScrollArea>
                   </DialogContent>
                 </Dialog>
-                <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg">
-                  💬 {post.comments}
-                </Button>
+                <Dialog 
+                  open={activeCommentsPost === post.id} 
+                  onOpenChange={(open) => setActiveCommentsPost(open ? post.id : null)}
+                >
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg">
+                      💬 {post.comments}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px] h-[80vh] flex flex-col">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-semibold">
+                        Comments ({post.comments})
+                      </DialogTitle>
+                    </DialogHeader>
+                    
+                    <ScrollArea className="flex-1 pr-4 -mr-4">
+                      <div className="space-y-4">
+                        {post.commentsList?.map((comment) => (
+                          <div 
+                            key={comment.id} 
+                            className="flex gap-3 p-4 rounded-lg hover:bg-muted/50 transition-colors"
+                          >
+                            <Avatar className="h-8 w-8 flex-shrink-0">
+                              <img src={comment.user.avatar} alt={comment.user.name} className="object-cover" />
+                            </Avatar>
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="font-medium">{comment.user.name}</span>
+                                  <span className="text-sm text-muted-foreground ml-2">
+                                    {comment.user.username}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-muted-foreground">
+                                  {comment.timestamp}
+                                </span>
+                              </div>
+                              <p className="text-sm">{comment.content}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+
+                    {/* <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                      <Input
+                        placeholder="Add a comment..."
+                        className="flex-1"
+                      />
+                      <Button size="sm">
+                        Post
+                      </Button>
+                    </div> */}
+                  </DialogContent>
+                </Dialog>
                 <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg">
                   ↗️ {post.shares}
                 </Button>
