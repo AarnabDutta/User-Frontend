@@ -64,9 +64,9 @@ export default function LandingPage() {
                                 <button onClick={()=>router.push("/login")} className="bg-blue-100 text-blue-600 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors">
                                     User Signup
                                 </button>
-                                {/* <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
+                                <button className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors">
                   Admin Login
-                </button> */}
+                </button>
                             </div>
 
                             {/* Mobile Menu Button */}
@@ -346,7 +346,7 @@ export default function LandingPage() {
                                 "/Sanskar Sisodia.png",
                                 "/passport photo.jpg",
                                 "/IMG_3941.PNG",
-                                "/abhijeet.png"
+                                "/abhijeet1.png"
                             ].map((image, index) => (
                                 <motion.div
                                     key={index}
