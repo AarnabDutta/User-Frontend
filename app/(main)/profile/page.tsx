@@ -19,16 +19,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { auth } from '@/lib/Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { apiRequest } from '@/app/apiconnector/api';
 
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState({
     name: '',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
     bio: '',
+    userId: '',
     stats: {
       posts: 142,
-      followers: 1234,
-      following: 567,
+      followers: 0,
+      following: 0,
       reports: 2
     }
   });
@@ -41,17 +43,54 @@ export default function ProfilePage() {
     bio: userProfile.bio || ''
   });
 
+  const fetchFollowerCounts = async (userId: string) => {
+    try {
+      // Fetch followers count
+      const followersResponse = await apiRequest(`followers/${userId}/followers/count`, 'GET');
+      const followersCount = followersResponse.data || 0;  // Extract the count from response
+
+      // Fetch following count
+      const followingResponse = await apiRequest(`followers/${userId}/following/count`, 'GET');
+      const followingCount = followingResponse.data || 0;  // Extract the count from response
+
+      setUserProfile(prev => ({
+        ...prev,
+        stats: {
+          ...prev.stats,
+          followers: Number(followersCount),
+          following: Number(followingCount)
+        }
+      }));
+    } catch (error) {
+      console.error('Error fetching follower counts:', error);
+      toast.error('Failed to fetch follower counts');
+      
+      // Set defaults in case of error
+      setUserProfile(prev => ({
+        ...prev,
+        stats: {
+          ...prev.stats,
+          followers: 0,
+          following: 0
+        }
+      }));
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        const userId = user.uid;
         setUserProfile(prev => ({
           ...prev,
           name: user.displayName || user.email?.split('@')[0] || 'User',
           avatar: user.photoURL || prev.avatar,
-          bio: prev.bio
+          bio: prev.bio,
+          userId: userId
         }));
         
-        // Update the edit form with the new user data
+        fetchFollowerCounts(userId);
+
         setEditForm({
           name: user.displayName || user.email?.split('@')[0] || 'User',
           bio: userProfile.bio || ''
