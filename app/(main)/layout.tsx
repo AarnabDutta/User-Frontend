@@ -26,6 +26,7 @@ import { useAuth } from '@/hooks/useAuth'; // Make sure you have this hook
 import Image from 'next/image';
 import { ProgressTimer } from '@/components/ui/progress-timer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { apiRequest } from '../apiconnector/api';
 
 interface SuggestedUser {
   id: number;
@@ -95,6 +96,9 @@ export default function MainLayout({
     }
   ]);
 
+  // const [myConnections, setMyConnections] = useState<Connection[]>([]);
+
+
   const [sentRequests, setSentRequests] = useState<number[]>([]);
   const [pendingRequests, setPendingRequests] = useState<number[]>([]);
   const [isConnectionsModalOpen, setIsConnectionsModalOpen] = useState(false);
@@ -162,10 +166,17 @@ export default function MainLayout({
     }
   };
 
+  const fetchAllTheConnection = async () => {
+    const res = await apiRequest("followers/31000000-0000-0000-0000-000000000000/following", "GET");
+    console.log(res);
+    // setMyConnections(res);
+  }
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
+
+    fetchAllTheConnection();
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -179,8 +190,8 @@ export default function MainLayout({
       {
         showSidebars && (
           <header className={`fixed top-0 w-full z-50 transition-all duration-200 ${scrolled
-              ? "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm"
-              : "bg-background"
+            ? "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm"
+            : "bg-background"
             }`}>
             <div className="container flex h-16 items-center justify-between px-6">
               <div className="flex items-center gap-3 animate-fade-in pl-2">

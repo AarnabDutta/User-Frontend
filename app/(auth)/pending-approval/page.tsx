@@ -1,21 +1,38 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Share2, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import { apiRequest } from '@/app/apiconnector/api';
 
 export default function PendingApprovalPage() {
   const [dots, setDots] = useState('.');
   const [progress, setProgress] = useState(0);
+  const router = useRouter(); 
 
   useEffect(() => {
+    const checkApproval = async () => {
+      try {
+        const res = await apiRequest(`users/4de03d12-cb9c-4118-83b7-d85665d2833b`, 'GET');
+        console.log(res.status)
+        if (res?.status === 1) {
+          router.push('/home');
+        }
+      } catch (error) {
+        console.error('Error fetching approval status:', error);
+      }
+    };
+
+    checkApproval();
+
     const dotInterval = setInterval(() => {
-      setDots(prev => prev.length < 3 ? prev + '.' : '.');
+      setDots((prev) => (prev.length < 3 ? prev + '.' : '.'));
     }, 500);
 
     const progressInterval = setInterval(() => {
-      setProgress(prev => {
+      setProgress((prev) => {
         const newProgress = prev + Math.random() * 5;
         return newProgress > 100 ? 100 : newProgress;
       });
@@ -25,14 +42,14 @@ export default function PendingApprovalPage() {
       clearInterval(dotInterval);
       clearInterval(progressInterval);
     };
-  }, []);
+  }, [router]); // ✅ Add `router` as dependency
 
   return (
     <div className="flex flex-col items-center space-y-4 p-6 animate-fade-in max-h-screen">
       <div className="bg-primary/10 p-3 rounded-full animate-pulse-slow">
         <Clock className="h-8 w-8 text-primary" />
       </div>
-      
+
       <div className="text-center space-y-2">
         <h1 className="text-2xl font-bold tracking-tight animate-slide-up">Account Pending Approval</h1>
         <p className="text-sm text-muted-foreground max-w-sm animate-slide-up" style={{ animationDelay: '0.1s' }}>
@@ -41,12 +58,12 @@ export default function PendingApprovalPage() {
       </div>
 
       <div className="w-full max-w-sm bg-secondary rounded-full h-3 overflow-hidden animate-slide-up" style={{ animationDelay: '0.2s' }}>
-        <div 
+        <div
           className="bg-primary h-full transition-all duration-1000 ease-out"
           style={{ width: `${progress}%` }}
         ></div>
       </div>
-      
+
       <div className="text-primary text-sm font-medium animate-slide-up" style={{ animationDelay: '0.3s' }}>
         Reviewing your information{dots}
       </div>
@@ -61,7 +78,7 @@ export default function PendingApprovalPage() {
             Once approved, you'll get full access to your personalized feed.
           </p>
         </div>
-        
+
         <div className="bg-card p-4 rounded-lg shadow-sm border hover-scale">
           <div className="flex items-center space-x-2 mb-2">
             <AlertCircle className="h-5 w-5 text-amber-500" />

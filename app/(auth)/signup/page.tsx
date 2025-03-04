@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Share2, UserPlus, AlertCircle, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   Form,
   FormControl,
   FormField,
@@ -19,6 +19,11 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, database } from '@/Firebase';
+import { ref, serverTimestamp, set } from 'firebase/database';
+import { toast } from 'sonner';
+import { apiRequest } from '@/app/apiconnector/api';
 
 const formSchema = z.object({
   firstName: z.string().min(2, { message: 'First name must be at least 2 characters' }),
@@ -49,18 +54,51 @@ export default function SignupPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     setError('');
-    
+    console.log(values);
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // Store user in Firebase Database
+      await set(ref(database, `finalusers/${user.uid}`), {
+        id: user.uid,
+        username: values.firstName + ' ' + values.lastName,
+        email: values.email,
+        password: values.password,
+        profile_picture: "",
+        bio: "",
+        status: 3,
+        reports: 0,
+        created_at: serverTimestamp(),
+        updated_at: serverTimestamp()
+      });
+
+
+      const saveAdminToDB = {
+        username: values.firstName + ' ' + values.lastName,
+        email: values.email,
+        password: values.password,
+        profilePicture: "",
+        bio: "",
+        reports: 0,
+      };
+
+      const res = await apiRequest("users", "POST", saveAdminToDB);
+      console.log(res);
+
+
+      toast.success("User created successfully");
+
       setSuccess(true);
-      
-      // Redirect after showing success message
+
+      // // Redirect after showing success message
       setTimeout(() => {
         router.push('/pending-approval');
       }, 2000);
-    } catch (err) {
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err.message);
       setError('An error occurred during signup. Please try again.');
     } finally {
       setIsLoading(false);
@@ -123,7 +161,7 @@ export default function SignupPage() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="lastName"
@@ -143,7 +181,7 @@ export default function SignupPage() {
               )}
             />
           </div>
-          
+
           <FormField
             control={form.control}
             name="email"
@@ -163,7 +201,7 @@ export default function SignupPage() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="password"
@@ -185,28 +223,28 @@ export default function SignupPage() {
               </FormItem>
             )}
           />
-          
-          <Button 
-            className="w-full h-11 hover-scale transition-all" 
-            type="submit" 
+
+          <Button
+            className="w-full h-11 hover-scale transition-all"
+            type="submit"
             disabled={isLoading}
           >
             {isLoading ? (
               <>
                 <span className="animate-spin mr-2">
                   <svg className="h-4 w-4" viewBox="0 0 24 24">
-                    <circle 
-                      className="opacity-25" 
-                      cx="12" 
-                      cy="12" 
-                      r="10" 
-                      stroke="currentColor" 
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
                       strokeWidth="4"
                       fill="none"
                     />
-                    <path 
-                      className="opacity-75" 
-                      fill="currentColor" 
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
