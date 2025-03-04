@@ -20,7 +20,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, database } from '@/Firebase';
+import { auth, database } from '@/lib/Firebase';
 import { ref, serverTimestamp, set } from 'firebase/database';
 import { toast } from 'sonner';
 import { apiRequest } from '@/app/apiconnector/api';

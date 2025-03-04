@@ -27,6 +27,8 @@ import Image from 'next/image';
 import { ProgressTimer } from '@/components/ui/progress-timer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from '../apiconnector/api';
+import { auth } from '@/lib/Firebase'; // Note the capital F in Firebase
+import { onAuthStateChanged } from 'firebase/auth';
 
 interface SuggestedUser {
   id: number;
@@ -98,6 +100,11 @@ export default function MainLayout({
 
   // const [myConnections, setMyConnections] = useState<Connection[]>([]);
 
+  const [currentUser, setCurrentUser] = useState({
+    name: '',
+    email: '',
+    photoURL: '',
+  });
 
   const [sentRequests, setSentRequests] = useState<number[]>([]);
   const [pendingRequests, setPendingRequests] = useState<number[]>([]);
@@ -176,10 +183,24 @@ export default function MainLayout({
       setScrolled(window.scrollY > 10);
     };
 
+    // Add Firebase auth listener
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser({
+          name: user.displayName || 'User',
+          email: user.email || '',
+          photoURL: user.photoURL || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop',
+        });
+      }
+    });
+
     fetchAllTheConnection();
 
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      unsubscribe();
+    };
   }, []);
 
   const showSidebars = !pathname?.includes('/landing');
@@ -233,11 +254,11 @@ export default function MainLayout({
                       <div className="flex flex-col h-full">
                         <div className="flex items-center gap-4 p-4 border-b">
                           <Avatar className="h-10 w-10">
-                            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
+                            <img src={currentUser.photoURL} alt="User" />
                           </Avatar>
                           <div>
-                            <h3 className="font-medium">John Doe</h3>
-                            <p className="text-sm text-muted-foreground">@johndoe</p>
+                            <h3 className="font-medium">{currentUser.name}</h3>
+                            <p className="text-sm text-muted-foreground">{currentUser.email}</p>
                           </div>
                         </div>
 
@@ -315,13 +336,14 @@ export default function MainLayout({
       {/* Sidebar Navigation */}
       {showSidebars && (
         <div className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 p-4 hidden md:block animate-fade-in">
+          {/* Replace the existing sidebar user section */}
           <div className="flex items-center gap-3 mb-4 p-2">
             <Avatar className="h-10 w-10">
-              <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
+              <img src={currentUser.photoURL} alt={currentUser.name} />
             </Avatar>
             <div>
-              <h3 className="font-medium">John Doe</h3>
-              <p className="text-sm text-muted-foreground">@johndoe</p>
+              <h3 className="font-medium">{currentUser.name}</h3>
+              <p className="text-sm text-muted-foreground">{currentUser.email}</p>
             </div>
           </div>
 
