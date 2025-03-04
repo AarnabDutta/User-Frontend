@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
@@ -17,12 +17,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { auth } from '@/lib/Firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState({
-    name: 'Aarnab Dutta',
+    name: '',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
-    bio: 'Team Lead | Frontend Developer',
+    bio: '',
     stats: {
       posts: 142,
       followers: 1234,
@@ -38,6 +40,27 @@ export default function ProfilePage() {
     name: userProfile.name,
     bio: userProfile.bio || ''
   });
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserProfile(prev => ({
+          ...prev,
+          name: user.displayName || user.email?.split('@')[0] || 'User',
+          avatar: user.photoURL || prev.avatar,
+          bio: prev.bio
+        }));
+        
+        // Update the edit form with the new user data
+        setEditForm({
+          name: user.displayName || user.email?.split('@')[0] || 'User',
+          bio: userProfile.bio || ''
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   interface Like {
     id: string;
