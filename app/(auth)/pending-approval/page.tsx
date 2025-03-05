@@ -15,7 +15,7 @@ export default function PendingApprovalPage() {
   useEffect(() => {
     const checkApproval = async () => {
       try {
-        const res = await apiRequest(`users/4de03d12-cb9c-4118-83b7-d85665d2833b`, 'GET');
+        const res = await apiRequest(`users/31300000-0000-0000-0000-000000000000`, 'GET');
         console.log(res.status)
         if (res?.status === 1) {
           router.push('/home');

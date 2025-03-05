@@ -1,7 +1,8 @@
+'use client'
 import { useRouter } from "next/navigation";
 
 export default function page({ params }: { params: { id: string } }) {
-  const router = useRouter();
+
   const { id } = params; 
 
   if (!id) return <p>Loading...</p>;
