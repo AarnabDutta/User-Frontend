@@ -18,277 +18,185 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { auth } from '@/lib/Firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, updateProfile } from 'firebase/auth';
 import { apiRequest } from '@/app/apiconnector/api';
-
-// Define interfaces
-interface Reaction {
-  id: string;
-  user?: {
-    name: string;
-    username: string;
-    avatar: string;
-  };
-  emoji: string;
-  timestamp: string;
-}
-
-interface ReactionCounts {
-  '👍': number;
-  '❤️': number;
-  '😆': number;
-  '😢': number;
-  '😡': number;
-}
-interface Comment {
-  id: string;
-  user: {
-    name: string;
-    username: string;
-    avatar: string;
-  };
-  content: string;
-  timestamp: string;
-}
-
-interface Post {
-  id: string | number;
-  content: string;
-  time: string;
-  reactions: number;
-  reactionsList: Reaction[];
-  reactionCounts: ReactionCounts;
-  comments: number;
-  commentsList: Comment[];
-  shares: number;
-}
-  
-const emojiMap: { [key: string]: keyof ReactionCounts } = {
-  'ƒÄë': '👍',
-  'ƒöÑ': '❤️',
-  'ƒÆ»': '😆',
-  'ƒüõ': '😢',
-  'ƒÉ£': '😡'
-};
 
 export default function ProfilePage() {
   const [userProfile, setUserProfile] = useState({
-    name: 'Fetching Name..',
+    name: '',
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=400&auto=format&fit=crop',
     bio: '',
     userId: '',
     stats: {
-      posts: 0,
+      posts: 142,
       followers: 0,
       following: 0,
-      reports: 0
+      reports: 2
     }
   });
 
-  const [posts, setPosts] = useState<Post[]>([]);
   const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [activeReactionsPost, setActiveReactionsPost] = useState<number | null>(null);
-  const [activeCommentsPost, setActiveCommentsPost] = useState<number | null>(null);
-  
   const [editForm, setEditForm] = useState({
     name: userProfile.name,
     bio: userProfile.bio || ''
   });
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Update the fetchPosts function where we process the reactions data:
-const fetchPosts = async (userId: string) => {
-  try {
-    const postsResponse = await apiRequest(`posts/user/${userId}`, 'GET');
-    
-    if (!postsResponse || !Array.isArray(postsResponse)) {
-      setPosts([]);
-      return;
-    }
-
-    const postsWithData = await Promise.all(
-      postsResponse.map(async (post) => {
-        try {
-          const [reactionsResponse, reactionsCount] = await Promise.all([
-            apiRequest(`reactions/posts/${post.id}`, 'GET'),
-            apiRequest(`reactions/posts/${post.id}/count`, 'GET')
-          ]);
-
-          // Initialize reaction counts
-          const reactionCounts: ReactionCounts = {
-            '👍': 0,
-            '❤️': 0,
-            '😆': 0,
-            '😢': 0,
-            '😡': 0
-          };
-
-          // Process reactions and count them with emoji mapping
-          if (Array.isArray(reactionsResponse)) {
-            reactionsResponse.forEach(reaction => {
-              const mappedEmoji = emojiMap[reaction.emoji] || '👍';
-              reactionCounts[mappedEmoji]++;
-            });
-          }
-
-          // Format reactions with user data and mapped emojis
-          const formattedReactions = Array.isArray(reactionsResponse) 
-            ? reactionsResponse.map(reaction => ({
-                id: reaction.id,
-                user: reaction.user || {
-                  name: 'Anonymous',
-                  username: 'anonymous',
-                  avatar: '/default-avatar.png'
-                },
-                emoji: emojiMap[reaction.emoji] || '👍', // Map the emoji here
-                timestamp: reaction.timestamp
-              }))
-            : [];
-
-            console.log('Processed reactions:', {
-              reactionCounts,
-              formattedReactions,
-              totalReactions: reactionsCount
-            });
-          // ... rest of the fetch logic ...
-
-          const [commentsResponse, commentsCount] = await Promise.all([
-            apiRequest(`comments/${post.id}`, 'GET'),
-            apiRequest(`comments/${post.id}/count`, 'GET')
-          ]);
-
-          return {
-            ...post,
-            reactions: Number(reactionsCount) || 0,
-            reactionsList: formattedReactions,
-            reactionCounts, // Make sure this is included
-            comments: Number(commentsCount) || 0,
-            commentsList: Array.isArray(commentsResponse) ? commentsResponse : [],
-            shares: post.shares || 0
-          };
-        } catch (error) {
-          console.error(`Error fetching data for post ${post.id}:`, error);
-          return {
-            ...post,
-            reactions: 0,
-            reactionsList: [],
-            reactionCounts: {
-              '👍': 0,
-              '❤️': 0,
-              '😆': 0,
-              '😢': 0,
-              '😡': 0
-            },
-            comments: 0,
-            commentsList: [],
-            shares: 0
-          };
-        }
-      })
-    );
-
-    setPosts(postsWithData);
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    toast.error('Failed to fetch posts');
-    setPosts([]);
-  }
-};
-
-  // Keep existing fetchReportCounts, fetchPostCounts, fetchFollowerCounts functions
-  const fetchReportCounts = async (userId: string) => {
-    try {
-      const reportCountResponse = await apiRequest(`users/${userId}`, 'GET');
-      const reportCount = reportCountResponse.reports || 0;
-      const userName = reportCountResponse.username || "Not FOUND";
-
-      setUserProfile(prev => ({
-        ...prev,
-        name: String(userName),
-        stats: {
-          ...prev.stats,
-          reports: Number(reportCount)
-        }
-      }));
-    } catch (error) {
-      console.error('Error fetching report counts:', error);
-      toast.error('Failed to fetch report counts');
-    }
-  };
-
-  const fetchPostCounts = async (userId: string) => {
-    try {
-      const postCountResponse = await apiRequest(`posts/user/${userId}/count`, 'GET');
-      const postCount = postCountResponse || 0;
-
-      setUserProfile(prev => ({
-        ...prev,
-        stats: {
-          ...prev.stats,
-          posts: Number(postCount)
-        }
-      }));
-    } catch (error) {
-      console.error('Error fetching post counts:', error);
-      toast.error('Failed to fetch post counts');
-    }
-  };
-
   const fetchFollowerCounts = async (userId: string) => {
     try {
-      const [followersResponse, followingResponse] = await Promise.all([
-        apiRequest(`followers/${userId}/followers/count`, 'GET'),
-        apiRequest(`followers/${userId}/following/count`, 'GET')
-      ]);
+      // Fetch followers count
+      const followersResponse = await apiRequest(`followers/${userId}/followers/count`, 'GET');
+      const followersCount = followersResponse || 0;  // Extract the count from response
+
+      // Fetch following count
+      const followingResponse = await apiRequest(`followers/${userId}/following/count`, 'GET');
+      const followingCount = followingResponse || 0;  // Extract the count from response
 
       setUserProfile(prev => ({
         ...prev,
         stats: {
           ...prev.stats,
-          followers: Number(followersResponse) || 0,
-          following: Number(followingResponse) || 0
+          followers: Number(followersCount),
+          following: Number(followingCount)
         }
       }));
     } catch (error) {
       console.error('Error fetching follower counts:', error);
       toast.error('Failed to fetch follower counts');
+      
+      // Set defaults in case of error
+      setUserProfile(prev => ({
+        ...prev,
+        stats: {
+          ...prev.stats,
+          followers: 0,
+          following: 0
+        }
+      }));
     }
   };
 
-  // Update handleReaction function
-const handleReaction = async (postId: string | number, emoji: string) => {
-  const userId = userProfile.userId;
-  if (!userId) {
-    toast.error('Please log in to react to posts');
-    return;
-  }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userId = user.uid;
+        setUserProfile(prev => ({
+          ...prev,
+          name: user.displayName || user.email?.split('@')[0] || 'User',
+          avatar: user.photoURL || prev.avatar,
+          bio: prev.bio,
+          userId: userId
+        }));
+        
+        fetchFollowerCounts(userId);
 
-  // Reverse emoji mapping for sending to server
-  const reverseEmojiMap: { [key: string]: string } = {
-    '👍': 'ƒÄë',
-    '❤️': 'ƒöÑ',
-    '😆': 'ƒÆ»',
-    '😢': 'ƒüõ',
-    '😡': 'ƒÉ£'
-  };
-
-  try {
-    await apiRequest(`reactions/posts/${postId}`, 'POST', {
-      userId,
-      emoji: reverseEmojiMap[emoji] || 'ƒÄë' // Convert emoji before sending
+        setEditForm({
+          name: user.displayName || user.email?.split('@')[0] || 'User',
+          bio: userProfile.bio || ''
+        });
+      }
     });
-    
-    await fetchPosts(userId);
-    toast.success('Reaction added successfully');
-  } catch (error) {
-    console.error('Error adding reaction:', error);
-    toast.error('Failed to add reaction');
-  }
-};
 
-  // Event Handlers
+    return () => unsubscribe();
+  }, []);
+
+  interface Like {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+  }
+
+  interface Comment {
+    id: string;
+    user: {
+      name: string;
+      username: string;
+      avatar: string;
+    };
+    content: string;
+    timestamp: string;
+  }
+
+  const [posts, setPosts] = useState([
+    {
+      id: 1,
+      content: 'Excited to announce that our team has just completed a major milestone in our blockchain project! 🚀 #blockchain #innovation',
+      time: '2h ago',
+      likes: 24,
+      likedBy: [
+        {
+          id: '1',
+          name: 'John Doe',
+          username: '@johndoe',
+          avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop'
+        },
+        {
+          id: '2',
+          name: 'Jane Smith',
+          username: '@janesmith',
+          avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop'
+        },
+        // ... more users
+      ],
+      comments: 5,
+      commentsList: [
+        {
+          id: '1',
+          user: {
+            name: 'John Doe',
+            username: '@johndoe',
+            avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop'
+          },
+          content: 'This is amazing! Congratulations on the milestone! 🎉',
+          timestamp: '2h ago'
+        },
+        // Add more comments as needed
+      ],
+      shares: 2
+    },
+    {
+      id: 2,
+      content: 'Just published my latest article on Web3 development. Check it out and let me know your thoughts! 📝 #web3 #development',
+      time: '4h ago',
+      likes: 42,
+      likedBy: [
+        {
+          id: '3',
+          name: 'Alice Johnson',
+          username: '@alicejohnson',
+          avatar: 'https://images.unsplash.com/photo-1502767089025-6572583495b9?q=80&w=100&auto=format&fit=crop'
+        },
+        {
+          id: '4',
+          name: 'Bob Brown',
+          username: '@bobbrown',
+          avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=100&auto=format&fit=crop'
+        },
+        // ... more users
+      ],
+      comments: 8,
+      commentsList: [
+        {
+          id: '1',
+          user: {
+            name: 'John Doe',
+            username: '@johndoe',
+            avatar: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop'
+          },
+          content: 'Great article! Very informative.',
+          timestamp: '3h ago'
+        },
+        // Add more comments as needed
+      ],
+      shares: 6
+    }
+  ]);
+
+  const [activeLikesPost, setActiveLikesPost] = useState<number | null>(null);
+  const [activeCommentsPost, setActiveCommentsPost] = useState<number | null>(null);
+  const [isFriend, setIsFriend] = useState(true); // Add this state
 
   const handleProfilePhotoUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -306,14 +214,40 @@ const handleReaction = async (postId: string | number, emoji: string) => {
 
     try {
       setIsUpdatingPhoto(true);
-      const previewUrl = URL.createObjectURL(file);
-      
-      // TODO: Implement actual file upload logic
+
+      // Create FormData for Cloudinary upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
+
+      // Upload to Cloudinary
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+
+      // Update Firebase auth profile
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          photoURL: data.secure_url
+        });
+      }
+
+      // Update local state
       setUserProfile(prev => ({
         ...prev,
-        avatar: previewUrl
+        avatar: data.secure_url
       }));
-      
+
       toast.success('Profile photo updated successfully');
     } catch (error) {
       console.error('Error updating profile photo:', error);
@@ -323,73 +257,30 @@ const handleReaction = async (postId: string | number, emoji: string) => {
     }
   };
 
-  const handleProfileUpdate = async () => {
+  const handleProfileUpdate = () => {
     try {
+      // Here you would typically make an API call to update the profile
       setUserProfile(prev => ({
         ...prev,
         name: editForm.name,
         bio: editForm.bio
       }));
-      
-      await apiRequest("users/31300000-0000-0000-0000-000000000000", 'PUT', {
-        username: editForm.name,
-        bio: editForm.bio
-      });
       setIsEditDialogOpen(false);
       toast.success('Profile updated successfully');
     } catch (error) {
-      console.error('Error updating profile:', error);
       toast.error('Failed to update profile');
+      console.error(error);
     }
   };
 
-  // Effects
-  useEffect(() => {
-    const userId = "31300000-0000-0000-0000-000000000000";
-    
-    const fetchInitialData = async () => {
-      await Promise.all([
-        fetchFollowerCounts(userId),
-        fetchPostCounts(userId),
-        fetchReportCounts(userId),
-        fetchPosts(userId)
-      ]);
-    };
-
-    fetchInitialData();
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUserProfile(prev => ({
-          ...prev,
-          name: user.displayName || "User",
-          avatar: user.photoURL || prev.avatar,
-          userId: user.uid
-        }));
-
-        setEditForm(prev => ({
-          ...prev,
-          name: user.displayName || "User"
-        }));
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (activeReactionsPost) {
-      fetchPosts(userProfile.userId);
+  const handleLikeClick = (postId: number) => {
+    if (!isFriend) {
+      toast.error("Only friends can like posts");
+      return;
     }
-  }, [activeReactionsPost]);
+    // Rest of your like handling logic
+  };
 
-  useEffect(() => {
-    if (activeCommentsPost) {
-      fetchPosts(userProfile.userId);
-    }
-  }, [activeCommentsPost]);
-
-  // JSX
   return (
     <div className="max-w-4xl mx-auto animate-fade-in">
       {/* Profile Header */}
@@ -515,7 +406,7 @@ const handleReaction = async (postId: string | number, emoji: string) => {
                 <div className="text-sm text-muted-foreground">Following</div>
               </div>
               <div className="text-center md:text-left">
-                <div className="text-2xl font-bold">{userProfile.stats.reports}</div>
+                <div className="text-2xl font-bold text-destructive">{userProfile.stats.reports}</div>
                 <div className="text-sm text-muted-foreground">Reports</div>
               </div>
             </div>
@@ -536,75 +427,46 @@ const handleReaction = async (postId: string | number, emoji: string) => {
               <div className="text-sm text-muted-foreground text-center">{post.time}</div>
               <Separator className="my-4" />
               <div className="flex justify-between">
-                <Dialog 
-                  open={activeReactionsPost === post.id} 
-                  onOpenChange={(open) => setActiveReactionsPost(open ? post.id : null)}
-                >
+                <Dialog open={activeLikesPost === post.id} onOpenChange={(open) => setActiveLikesPost(open ? post.id : null)}>
                   <DialogTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="hover:text-primary rounded-lg space-x-1"
-                  >
-                    <div className="flex -space-x-1">
-                      {Object.entries(post.reactionCounts)
-                        .filter(([_, count]) => count > 0)
-                        .map(([emoji]) => (
-                          <span key={emoji}>{emoji}</span>
-                        ))}
-                    </div>
-                    <span>{post.reactions}</span>
-                  </Button>
-                </DialogTrigger>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="hover:text-primary rounded-lg"
+                      onClick={() => handleLikeClick(post.id)}
+                    >
+                      👍 {post.likes}
+                    </Button>
+                  </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                       <DialogTitle className="text-xl font-semibold">
-                        Reactions
+                        Liked by {post.likes} people
                       </DialogTitle>
                     </DialogHeader>
-                    <div className="grid grid-cols-5 gap-2 p-4 border-b">
-                      {[
-                        { emoji: '👍', label: 'Like' },
-                        { emoji: '❤️', label: 'Love' },
-                        { emoji: '😆', label: 'Haha' },
-                        { emoji: '😢', label: 'Sad' },
-                        { emoji: '😡', label: 'Angry' }
-                      ].map(({ emoji, label }) => (
-                        <Button
-                          key={emoji}
-                          variant={post.reactionsList.some(r => r.emoji === emoji) ? "default" : "ghost"}
-                          size="sm"
-                          className="flex flex-col gap-1 h-auto py-2"
-                          onClick={() => handleReaction(post.id, emoji)}
-                        >
-                          <span className="text-2xl">{emoji}</span>
-                          <span className="text-xs">{post.reactionCounts[emoji as keyof ReactionCounts]}</span>
-                        </Button>
-                      ))}
-                    </div>
                     <ScrollArea className="max-h-[60vh] pr-4">
-                    <div className="space-y-4 mt-4">
-                      {Array.isArray(post.reactionsList) && post.reactionsList.map((reaction) => (
-                        <div key={reaction.id} className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors">
-                          <Avatar className="h-10 w-10">
-                            <img 
-                              src={reaction.user?.avatar || '/default-avatar.png'} 
-                              alt={reaction.user?.name || 'Anonymous'} 
-                              className="object-cover" 
-                            />
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">
-                              {reaction.user?.name || 'Anonymous'}
-                            </p>
-                            <p className="text-sm text-muted-foreground truncate">
-                              {reaction.user?.username || 'anonymous'}
-                            </p>
+                      <div className="space-y-4 mt-4">
+                        {post.likedBy?.map((user) => (
+                          <div key={user.id} className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg transition-colors">
+                            <Avatar className="h-10 w-10">
+                              <img src={user.avatar} alt={user.name} className="object-cover" />
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{user.name}</p>
+                              <p className="text-sm text-muted-foreground truncate">
+                                {user.username}
+                              </p>
+                            </div>
+                            {/* <Button
+                              variant="outline"
+                              size="sm"
+                              className="ml-auto"
+                            >
+                              Follow
+                            </Button> */}
                           </div>
-                          <span className="text-2xl">{reaction.emoji}</span>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
                     </ScrollArea>
                   </DialogContent>
                 </Dialog>
@@ -664,9 +526,8 @@ const handleReaction = async (postId: string | number, emoji: string) => {
                     </div> */}
                   </DialogContent>
                 </Dialog>
-                
                 <Button variant="ghost" size="sm" className="hover:text-primary rounded-lg">
-                  ↗️
+                  ↗️ {post.shares}
                 </Button>
               </div>
             </Card>
