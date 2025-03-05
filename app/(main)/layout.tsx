@@ -29,12 +29,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest } from '../apiconnector/api';
 import { auth } from '@/lib/Firebase'; // Note the capital F in Firebase
 import { onAuthStateChanged } from 'firebase/auth';
+import { set } from 'zod';
 
 interface SuggestedUser {
   id: number;
   name: string;
   username: string;
-  avatar: string;
+  profilePicture: string;
   title: string;
 }
 
@@ -53,52 +54,18 @@ export default function MainLayout({
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [suggestedUsers] = useState<SuggestedUser[]>([
-    {
-      id: 1,
-      name: "Emma Thompson",
-      username: "@emmat",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop",
-      title: "Blockchain Developer"
-    },
-    {
-      id: 2,
-      name: "David Chen",
-      username: "@dchen",
-      avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop",
-      title: "Smart Contract Engineer"
-    },
-    {
-      id: 3,
-      name: "Sarah Miller",
-      username: "@sarahm",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop",
-      title: "DeFi Specialist"
-    }
-  ]);
+  const [suggestedUsers, setSuggestedUser] = useState<SuggestedUser[]>([]);
+  useEffect(() => {
+    const fetchSuggestedUser = async () => {
+      const res = await apiRequest("followers/6dc63ffd-40b6-4245-8f3a-77f88bf1b706/notfollowed", "GET");
 
-  const [myConnections] = useState<Connection[]>([
-    {
-      id: 1,
-      name: "Alice Johnson",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop",
-      status: 'online'
-    },
-    {
-      id: 2,
-      name: "Bob Wilson",
-      avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=100&auto=format&fit=crop",
-      status: 'offline'
-    },
-    {
-      id: 3,
-      name: "Carol Smith",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=100&auto=format&fit=crop",
-      status: 'online'
+      setSuggestedUser(res);
     }
-  ]);
 
-  // const [myConnections, setMyConnections] = useState<Connection[]>([]);
+    fetchSuggestedUser();
+  }, [])
+
+  const [myConnections, setMyConnections] = useState<Connection[]>([]);
 
   const [currentUser, setCurrentUser] = useState({
     name: '',
@@ -130,37 +97,8 @@ export default function MainLayout({
     { name: 'Post', href: '#', icon: PenSquare, notifications: 0 },
   ];
 
-  const allSuggestedUsers: SuggestedUser[] = [
-    ...suggestedUsers,
-    {
-      id: 4,
-      name: "Michael Chang",
-      username: "@mchang",
-      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop",
-      title: "Filecoin Developer"
-    },
-    {
-      id: 5,
-      name: "Lisa Wang",
-      username: "@lwang",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop",
-      title: "IPFS Specialist"
-    },
-    {
-      id: 6,
-      name: "James Wilson",
-      username: "@jwilson",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop",
-      title: "Web3 Engineer"
-    },
-    {
-      id: 7,
-      name: "Elena Rodriguez",
-      username: "@erodriguez",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=100&auto=format&fit=crop",
-      title: "Blockchain Architect"
-    }
-  ];
+  const allSuggestedUsers: SuggestedUser[] = suggestedUsers.slice(0, 3);
+
 
   const router = useRouter();
   const { signOut } = useAuth();
@@ -172,6 +110,22 @@ export default function MainLayout({
       router.push(href);
     }
   };
+
+  const sentTheConnectionReq = async (followingId: string, followerId: string) => {
+
+    const dataToBeSend = {
+      followerId,
+      followingId
+    };
+
+    try {
+      const res = await apiRequest(`followers/follow?followerId=${followerId}&followingId=${followingId}`, "POST");
+      console.log("Response: ", res);
+    } catch (error) {
+      console.log("Error: ", error);
+    }
+  };
+
 
   const fetchAllTheConnection = async () => {
     const res = await apiRequest("followers/31000000-0000-0000-0000-000000000000/following", "GET");
@@ -464,7 +418,7 @@ export default function MainLayout({
         <div className="fixed right-0 top-16 h-[calc(100vh-4rem)] w-80 p-4 hidden md:block animate-fade-in">
           <h3 className="font-semibold mb-4 animate-slide-up">People you may know</h3>
           <div className="space-y-3">
-            {suggestedUsers.map((user, index) => {
+            {allSuggestedUsers.map((user: any, index: number) => {
               const isRequestSent = sentRequests.includes(user.id);
 
               return (
@@ -475,12 +429,21 @@ export default function MainLayout({
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <img src={user.avatar} alt={user.name} />
+                      <Image
+                        width={30}
+                        height={30}
+                        src={user.profilePicture || "https://github.com/shadcn.png"}
+                        alt={user.username}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "https://github.com/shadcn.png";
+                        }}
+                      />
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{user.name}</p>
-                      <p className="text-sm text-muted-foreground truncate">{user.title}</p>
-                      <p className="text-xs text-muted-foreground truncate">{user.username}</p>
+                      <p className="font-medium truncate">{user.username}</p>
+                      <p className="text-sm text-muted-foreground truncate">{user.bio}</p>
+                      <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                     </div>
                     <Button
                       size="sm"
@@ -489,6 +452,7 @@ export default function MainLayout({
                         }`}
                       onClick={() => {
                         if (!isRequestSent && !pendingRequests.includes(user.id)) {
+                          sentTheConnectionReq(user.id, "31000000-0000-0000-0000-000000000000");
                           setPendingRequests(prev => [...prev, user.id]);
                           setTimeout(() => {
                             setPendingRequests(prev => prev.filter(id => id !== user.id));
@@ -613,9 +577,9 @@ export default function MainLayout({
 
           <div className="flex-1 overflow-y-auto dialog-scroll pr-4 -mr-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {allSuggestedUsers
+              {suggestedUsers
                 .filter(user =>
-                  user.name.toLowerCase().includes(suggestionsSearchQuery.toLowerCase()) ||
+                  user.username.toLowerCase().includes(suggestionsSearchQuery.toLowerCase()) ||
                   user.username.toLowerCase().includes(suggestionsSearchQuery.toLowerCase()) ||
                   user.title.toLowerCase().includes(suggestionsSearchQuery.toLowerCase())
                 )
@@ -629,7 +593,7 @@ export default function MainLayout({
                     >
                       <div className="flex items-center gap-4">
                         <Avatar className="h-12 w-12">
-                          <img src={user.avatar} alt={user.name} className="object-cover" />
+                          <Image width={80} height={80} src={user.profilePicture} alt={user.username} className="object-cover" />
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate">{user.name}</p>
@@ -747,7 +711,7 @@ export default function MainLayout({
                   // Here you would typically make an API call to search users
                   const query = e.target.value.toLowerCase();
                   const filtered = allSuggestedUsers.filter(user =>
-                    user.name.toLowerCase().includes(query) ||
+                    user.username.toLowerCase().includes(query) ||
                     user.username.toLowerCase().includes(query) ||
                     user.title.toLowerCase().includes(query)
                   ).map(user => ({
@@ -766,10 +730,10 @@ export default function MainLayout({
                 <Card key={user.id} className="p-4 hover:shadow-md transition-all">
                   <div className="flex items-center gap-4">
                     <Avatar className="h-12 w-12">
-                      <img src={user.avatar} alt={user.name} className="object-cover" />
+                      <img src={user.avatar} alt={user.username} className="object-cover" />
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{user.name}</p>
+                      <p className="font-medium truncate">{user.username}</p>
                       <p className="text-sm text-muted-foreground truncate">{user.title}</p>
                       <p className="text-xs text-muted-foreground truncate">{user.username}</p>
                     </div>

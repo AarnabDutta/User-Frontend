@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { auth } from '@/lib/Firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, updateProfile } from 'firebase/auth';
 import { apiRequest } from '@/app/apiconnector/api';
 
 export default function ProfilePage() {
@@ -47,11 +47,11 @@ export default function ProfilePage() {
     try {
       // Fetch followers count
       const followersResponse = await apiRequest(`followers/${userId}/followers/count`, 'GET');
-      const followersCount = followersResponse.data || 0;  // Extract the count from response
+      const followersCount = followersResponse || 0;  // Extract the count from response
 
       // Fetch following count
       const followingResponse = await apiRequest(`followers/${userId}/following/count`, 'GET');
-      const followingCount = followingResponse.data || 0;  // Extract the count from response
+      const followingCount = followingResponse || 0;  // Extract the count from response
 
       setUserProfile(prev => ({
         ...prev,
@@ -201,35 +201,57 @@ export default function ProfilePage() {
   const handleProfilePhotoUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-  
-    // File validation
+
     if (!file.type.startsWith('image/')) {
       toast.error('Please select an image file');
       return;
     }
-  
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+
+    if (file.size > 5 * 1024 * 1024) {
       toast.error('Image size should be less than 5MB');
       return;
     }
-  
+
     try {
       setIsUpdatingPhoto(true);
-      
-      // Create a preview URL
-      const previewUrl = URL.createObjectURL(file);
-      
-      // Here you would typically:
-      // 1. Upload the file to your storage
-      // 2. Get the uploaded file URL
-      // 3. Update the user profile with new photo URL
-      // For now, we'll just update the local state
-      
-      userProfile.avatar = previewUrl;
+
+      // Create FormData for Cloudinary upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
+
+      // Upload to Cloudinary
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+
+      // Update Firebase auth profile
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, {
+          photoURL: data.secure_url
+        });
+      }
+
+      // Update local state
+      setUserProfile(prev => ({
+        ...prev,
+        avatar: data.secure_url
+      }));
+
       toast.success('Profile photo updated successfully');
     } catch (error) {
+      console.error('Error updating profile photo:', error);
       toast.error('Failed to update profile photo');
-      console.error(error);
     } finally {
       setIsUpdatingPhoto(false);
     }
