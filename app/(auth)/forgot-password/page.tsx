@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center space-y-2 animate-slide-up">
           <h1 className="text-2xl font-bold tracking-tight">Check your email</h1>
           <p className="text-sm text-muted-foreground max-w-sm">
-            We've sent you a password reset link. Please check your email.
+            We`ve sent you a password reset link. Please check your email.
           </p>
         </div>
         <Button className="w-full h-11 animate-slide-up hover-scale" style={{ animationDelay: '0.2s' }} asChild>
@@ -78,7 +78,7 @@ export default function ForgotPasswordPage() {
         </div>
         <h1 className="text-2xl font-bold tracking-tight animate-slide-up">Forgot password?</h1>
         <p className="text-sm text-muted-foreground max-w-sm text-center animate-slide-up" style={{ animationDelay: '0.1s' }}>
-          Enter your email and we'll send you a reset link
+          Enter your email and we`ll send you a reset link
         </p>
       </div>
 
