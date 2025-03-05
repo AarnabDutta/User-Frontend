@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Share2, LogIn, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { 
+import {
   Form,
   FormControl,
   FormField,
@@ -19,6 +19,10 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/Firebase';
+import { toast } from 'sonner';
+import { apiRequest } from '@/app/apiconnector/api';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
@@ -41,11 +45,18 @@ export default function LoginPage() {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     setError('');
-    
+
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      // // Simulate API call
+      // await new Promise(resolve => setTimeout(resolve, 1000));
+      const res = await signInWithEmailAndPassword(auth, values.email, values.password);
+      console.log(res);
+      toast.message("Login Successful");
+      // Check the user with the mail from the that is from the firebase and in the db and get the userId from the database and check the status of the user and redirect to the respective page
+      // const res = await apiRequest(`users/${values.email}`, 'GET');
+      localStorage.setItem("userId", res.user.uid);
+
+
       // For demo purposes, always redirect to pending-approval
       router.push('/pending-approval');
     } catch (err) {
@@ -95,7 +106,7 @@ export default function LoginPage() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="password"
@@ -103,7 +114,7 @@ export default function LoginPage() {
               <FormItem>
                 <div className="flex items-center justify-between">
                   <FormLabel>Password</FormLabel>
-                  <Link 
+                  <Link
                     href="/forgot-password"
                     className="text-sm text-primary hover:underline"
                   >
@@ -122,28 +133,28 @@ export default function LoginPage() {
               </FormItem>
             )}
           />
-          
-          <Button 
-            className="w-full h-11 hover-scale transition-all" 
-            type="submit" 
+
+          <Button
+            className="w-full h-11 hover-scale transition-all"
+            type="submit"
             disabled={isLoading}
           >
             {isLoading ? (
               <>
                 <span className="animate-spin mr-2">
                   <svg className="h-4 w-4" viewBox="0 0 24 24">
-                    <circle 
-                      className="opacity-25" 
-                      cx="12" 
-                      cy="12" 
-                      r="10" 
-                      stroke="currentColor" 
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
                       strokeWidth="4"
                       fill="none"
                     />
-                    <path 
-                      className="opacity-75" 
-                      fill="currentColor" 
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>

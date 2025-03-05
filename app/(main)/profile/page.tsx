@@ -64,7 +64,7 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Error fetching follower counts:', error);
       toast.error('Failed to fetch follower counts');
-      
+
       // Set defaults in case of error
       setUserProfile(prev => ({
         ...prev,
@@ -88,7 +88,7 @@ export default function ProfilePage() {
           bio: prev.bio,
           userId: userId
         }));
-        
+
         fetchFollowerCounts(userId);
 
         setEditForm({
@@ -234,6 +234,7 @@ export default function ProfilePage() {
       }
 
       const data = await response.json();
+      localStorage.setItem("profile_picture", data.secure_url);
 
       // Update Firebase auth profile
       if (auth.currentUser) {
@@ -289,8 +290,8 @@ export default function ProfilePage() {
           {/* Profile Photo */}
           <div className="relative mb-6 md:mb-0">
             <Avatar className="w-40 h-40 border-4 border-background shadow-xl hover:scale-105 transition-transform duration-200">
-              <img 
-                src={userProfile.avatar} 
+              <img
+                src={userProfile.avatar}
                 alt={userProfile.name}
                 className="object-cover"
               />
@@ -419,8 +420,8 @@ export default function ProfilePage() {
         <h2 className="text-xl font-semibold mb-4 text-center">Posts</h2>
         <div className="space-y-4">
           {posts.map((post) => (
-            <Card 
-              key={post.id} 
+            <Card
+              key={post.id}
               className="p-6 hover:shadow-lg transition-all duration-200 bg-background/60 backdrop-blur-sm rounded-xl"
             >
               <p className="mb-4 text-lg text-center">{post.content}</p>
@@ -429,9 +430,9 @@ export default function ProfilePage() {
               <div className="flex justify-between">
                 <Dialog open={activeLikesPost === post.id} onOpenChange={(open) => setActiveLikesPost(open ? post.id : null)}>
                   <DialogTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       className="hover:text-primary rounded-lg"
                       onClick={() => handleLikeClick(post.id)}
                     >
@@ -470,8 +471,8 @@ export default function ProfilePage() {
                     </ScrollArea>
                   </DialogContent>
                 </Dialog>
-                <Dialog 
-                  open={activeCommentsPost === post.id} 
+                <Dialog
+                  open={activeCommentsPost === post.id}
                   onOpenChange={(open) => setActiveCommentsPost(open ? post.id : null)}
                 >
                   <DialogTrigger asChild>
@@ -485,12 +486,12 @@ export default function ProfilePage() {
                         Comments ({post.comments})
                       </DialogTitle>
                     </DialogHeader>
-                    
+
                     <ScrollArea className="flex-1 pr-4 -mr-4">
                       <div className="space-y-4">
                         {post.commentsList?.map((comment) => (
-                          <div 
-                            key={comment.id} 
+                          <div
+                            key={comment.id}
                             className="flex gap-3 p-4 rounded-lg hover:bg-muted/50 transition-colors"
                           >
                             <Avatar className="h-8 w-8 flex-shrink-0">

@@ -41,8 +41,8 @@ interface SuggestedUser {
 
 interface Connection {
   id: number;
-  name: string;
-  avatar: string;
+  username: string;
+  profilePicture: string;
   status: 'online' | 'offline';
 }
 
@@ -128,9 +128,9 @@ export default function MainLayout({
 
 
   const fetchAllTheConnection = async () => {
-    const res = await apiRequest("followers/31000000-0000-0000-0000-000000000000/following", "GET");
-    console.log(res);
-    // setMyConnections(res);
+    const res = await apiRequest("followers/31000000-0000-0000-0000-000000000000/followed", "GET");
+    console.log("HEllo ", res);
+    setMyConnections(res);
   }
   useEffect(() => {
     const handleScroll = () => {
@@ -139,6 +139,7 @@ export default function MainLayout({
 
     // Add Firebase auth listener
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log(user);
       if (user) {
         setCurrentUser({
           name: user.displayName || 'User',
@@ -211,7 +212,7 @@ export default function MainLayout({
                             <img src={currentUser.photoURL} alt="User" />
                           </Avatar>
                           <div>
-                            <h3 className="font-medium">{currentUser.name}</h3>
+                            <h3 className="font-medium">{currentUser.username}</h3>
                             <p className="text-sm text-muted-foreground">{currentUser.email}</p>
                           </div>
                         </div>
@@ -346,7 +347,7 @@ export default function MainLayout({
                 >
                   <div className="relative">
                     <Avatar className="h-8 w-8">
-                      <img src={connection.avatar} alt={connection.name} />
+                      <img src={connection.profilePicture} alt={connection.username} />
                     </Avatar>
                     <span
                       className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background ${connection.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
@@ -354,7 +355,7 @@ export default function MainLayout({
                     />
                   </div>
                   <span className="text-sm font-medium truncate group-hover:text-primary transition-colors">
-                    {connection.name}
+                    {connection.username}
                   </span>
                 </Link>
               ))}
@@ -519,7 +520,7 @@ export default function MainLayout({
             <div className="space-y-3">
               {myConnections
                 .filter(connection =>
-                  connection.name.toLowerCase().includes(searchQuery.toLowerCase())
+                  connection.username.toLowerCase().includes(searchQuery.toLowerCase())
                 )
                 .map((connection) => (
                   <div
@@ -528,7 +529,7 @@ export default function MainLayout({
                   >
                     <div className="relative">
                       <Avatar className="h-12 w-12">
-                        <img src={connection.avatar} alt={connection.name} />
+                        <img src={connection.profilePicture} alt={connection.username} />
                       </Avatar>
                       <span
                         className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-background ${connection.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
@@ -537,7 +538,7 @@ export default function MainLayout({
                     </div>
 
                     <div className="flex-1">
-                      <h4 className="font-medium">{connection.name}</h4>
+                      <h4 className="font-medium">{connection.username}</h4>
                       <p className="text-sm text-muted-foreground">
                         {connection.status === 'online' ? 'Active now' : 'Offline'}
                       </p>

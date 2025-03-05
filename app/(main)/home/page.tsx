@@ -8,7 +8,7 @@ import { Share2, Image, Video, Smile, Send, MoreHorizontal, Flag, MessageCircle,
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -42,8 +42,11 @@ interface Post {
 }
 
 export default function HomePage() {
+
   const [newPost, setNewPost] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profilePicture, setProfilePicture] = useState<string>("https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop");
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [posts, setPosts] = useState<Post[]>([
     {
@@ -101,19 +104,24 @@ export default function HomePage() {
       shares: 9
     }
   ]);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [commentText, setCommentText] = useState('');
   const [activeCommentId, setActiveCommentId] = useState<number | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  
+
   const emojis = ['😀', '😂', '❤️', '👍', '🎉', '🔥', '💯', '🚀'];
+
+  useEffect(() => {
+    const myprofile = localStorage.getItem("profile_picture") ?? "";
+    setProfilePicture(myprofile!);
+  }, [])
 
   const handlePostSubmit = () => {
     if (!newPost.trim() && !selectedImage) return;
-    
+
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       const newPostObj = {
@@ -129,7 +137,7 @@ export default function HomePage() {
         commentsList: [],
         shares: 0
       };
-      
+
       setPosts([newPostObj, ...posts]);
       setNewPost('');
       setSelectedImage(null);
@@ -231,14 +239,14 @@ export default function HomePage() {
           text: 'I found this interesting post on FILxCONNECT',
           url: shareUrl
         });
-        
+
         // Update share count
-        setPosts(prevPosts => prevPosts.map(post => 
-          post.id === postId 
+        setPosts(prevPosts => prevPosts.map(post =>
+          post.id === postId
             ? { ...post, shares: post.shares + 1 }
             : post
         ));
-        
+
         toast.success('Post shared successfully!');
       } else {
         throw new Error('Web Share API not supported');
@@ -248,10 +256,10 @@ export default function HomePage() {
       try {
         await navigator.clipboard.writeText(shareUrl);
         toast.success('Link copied to clipboard!');
-        
+
         // Update share count
-        setPosts(prevPosts => prevPosts.map(post => 
-          post.id === postId 
+        setPosts(prevPosts => prevPosts.map(post =>
+          post.id === postId
             ? { ...post, shares: post.shares + 1 }
             : post
         ));
@@ -266,7 +274,7 @@ export default function HomePage() {
       <Card className="p-4 mb-6 shadow-md hover-scale transition-all">
         <div className="flex gap-4">
           <Avatar className="w-10 h-10">
-            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
+            <img src={profilePicture} alt="Profile" />
           </Avatar>
           <div className="flex-1">
             <Textarea
@@ -276,17 +284,17 @@ export default function HomePage() {
               className="mb-4 resize-none hover-scale focus:border-primary"
               rows={2}
             />
-            
+
             {selectedImage && (
               <div className="relative mb-4">
-                <img 
-                  src={selectedImage} 
-                  alt="Selected" 
+                <img
+                  src={selectedImage}
+                  alt="Selected"
                   className="w-full h-48 object-cover rounded-lg"
                 />
-                <Button 
-                  variant="destructive" 
-                  size="sm" 
+                <Button
+                  variant="destructive"
+                  size="sm"
                   className="absolute top-2 right-2"
                   onClick={() => setSelectedImage(null)}
                 >
@@ -294,15 +302,15 @@ export default function HomePage() {
                 </Button>
               </div>
             )}
-            
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              className="hidden" 
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
               accept="image/*"
               onChange={handleImageChange}
             />
-            
+
             <div className="flex justify-between items-center">
               <div className="flex gap-2">
                 <Button variant="ghost" size="sm" onClick={handleImageClick} className="hover-scale">
@@ -314,21 +322,21 @@ export default function HomePage() {
                   Video
                 </Button>
                 <div className="relative inline-block">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                     className="hover-scale"
                   >
                     <Smile className="w-4 h-4 mr-2 text-primary" />
                     Feeling
                   </Button>
-                  
+
                   {showEmojiPicker && (
                     <div className="absolute top-full left-0 mt-1 bg-card shadow-lg rounded-lg p-2 z-10 grid grid-cols-4 gap-2">
                       {emojis.map(emoji => (
-                        <button 
-                          key={emoji} 
+                        <button
+                          key={emoji}
                           className="text-lg p-2 hover:bg-muted rounded-md transition-colors"
                           onClick={() => addEmoji(emoji)}
                         >
@@ -339,27 +347,27 @@ export default function HomePage() {
                   )}
                 </div>
               </div>
-              <Button 
-                size="sm" 
-                onClick={handlePostSubmit} 
+              <Button
+                size="sm"
+                onClick={handlePostSubmit}
                 disabled={isSubmitting || (!newPost.trim() && !selectedImage)}
                 className="hover-scale"
               >
                 {isSubmitting ? (
                   <span className="animate-spin mr-2">
                     <svg className="h-4 w-4" viewBox="0 0 24 24">
-                      <circle 
-                        className="opacity-25" 
-                        cx="12" 
-                        cy="12" 
-                        r="10" 
-                        stroke="currentColor" 
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
                         strokeWidth="4"
                         fill="none"
                       />
-                      <path 
-                        className="opacity-75" 
-                        fill="currentColor" 
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
                     </svg>
@@ -402,19 +410,19 @@ export default function HomePage() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          
+
           <p className="mb-4">{post.content}</p>
-          
+
           {post.image && (
             <div className="mb-4">
-              <img 
-                src={post.image} 
-                alt="Post" 
+              <img
+                src={post.image}
+                alt="Post"
                 className="w-full rounded-lg object-cover max-h-96"
               />
             </div>
           )}
-          
+
           <div className="flex gap-2 mb-4">
             {post.content.split(' ').filter(word => word.startsWith('#')).map((tag, index) => (
               <Badge key={index} variant="secondary" className="hover-scale">
@@ -422,29 +430,29 @@ export default function HomePage() {
               </Badge>
             ))}
           </div>
-          
+
           <Separator className="my-4" />
-          
+
           <div className="flex justify-between">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => handleLike(post.id)}
               className={post.liked ? "text-red-500" : ""}
             >
               <Heart className={`h-4 w-4 mr-2 ${post.liked ? "fill-current text-red-500" : ""}`} />
               {post.likes}
             </Button>
-            
-            <Button 
-              variant="ghost" 
+
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => handleComment(post.id)}
             >
               <MessageCircle className="h-4 w-4 mr-2" />
               {post.comments}
             </Button>
-            
+
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="ghost" size="sm">
@@ -461,7 +469,7 @@ export default function HomePage() {
                     Share this post with your followers or on other platforms
                   </p>
                   <div className="flex gap-2">
-                    <Button 
+                    <Button
                       className="flex-1 hover-scale"
                       onClick={() => {
                         handleShare(post.id);
@@ -475,8 +483,8 @@ export default function HomePage() {
                       <Share2 className="h-4 w-4 mr-2" />
                       Share now
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="flex-1 hover-scale"
                       onClick={async () => {
                         const url = `${window.location.origin}/post/${post.id}`;
@@ -492,7 +500,7 @@ export default function HomePage() {
               </DialogContent>
             </Dialog>
           </div>
-          
+
           <Dialog open={activeCommentId === post.id} onOpenChange={(open) => setActiveCommentId(open ? post.id : null)}>
             <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
@@ -533,14 +541,14 @@ export default function HomePage() {
                     <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=100&auto=format&fit=crop" alt="User" />
                   </Avatar>
                   <div className="flex-1 space-y-2">
-                    <Input 
-                      placeholder="Write a comment..." 
+                    <Input
+                      placeholder="Write a comment..."
                       value={commentText}
                       onChange={(e) => setCommentText(e.target.value)}
                       className="bg-muted/50"
                     />
                     <div className="flex justify-end gap-2">
-                      <Button 
+                      <Button
                         size="sm"
                         onClick={() => submitComment(post.id)}
                         disabled={!commentText.trim()}
